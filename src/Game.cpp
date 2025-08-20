@@ -247,6 +247,21 @@ void Game::processInput(const std::string& input) {
     if (input == "help") {
         printHelp();
     } else if (input == "look") {
+        std::cout << std::endl;
+        std::cout << player->getCurrentRoom()->getDescription() << std::endl;
+        std::cout << std::endl << "It's you!" << std::endl;
+        std::cout << player->getRepresentation() << std::endl << std::endl;
+        player->getCurrentRoom()->printExits();
+    } else if (input == "inventory" || input == "i") {
+        const auto& inventory = player->getInventory();
+        if (inventory.empty()) {
+            std::cout << "You are not carrying anything." << std::endl;
+        } else {
+            std::cout << "You are carrying:" << std::endl;
+            for (const auto& item : inventory) {
+                std::cout << " - " << item << std::endl;
+            }
+        }
         printCurrentRoomInfo();
     } else if (input == "dance") {
         std::cout << "You do a little jig. It's surprisingly uplifting." << std::endl;
@@ -258,6 +273,14 @@ void Game::processInput(const std::string& input) {
 
         if (nextRoom != nullptr) {
             player->setCurrentRoom(nextRoom);
+            std::cout << std::endl;
+            std::cout << player->getCurrentRoom()->getDescription() << std::endl;
+            player->getCurrentRoom()->printExits();
+        } else {
+            std::cout << "You can't go that way." << std::endl;
+            std::cout << std::endl << "It's you!" << std::endl;
+            std::cout << player->getRepresentation() << std::endl << std::endl;
+            player->getCurrentRoom()->printExits();
             printCurrentRoomInfo();
         } else {
             std::cout << "You can't go that way. Type 'help' for a list of commands." << std::endl;
