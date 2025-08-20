@@ -49,6 +49,8 @@ void Game::printWelcomeMessage() {
     std::cout << "----------------------------------------" << std::endl;
     if (player) {
         std::cout << player->getCurrentRoom()->getDescription() << std::endl;
+        std::cout << std::endl << "It's you!" << std::endl;
+        std::cout << player->getRepresentation() << std::endl << std::endl;
         player->getCurrentRoom()->printExits();
     }
 }
@@ -79,6 +81,8 @@ void Game::processInput(const std::string& input) {
         player->setCurrentRoom(nextRoom);
         std::cout << std::endl;
         std::cout << player->getCurrentRoom()->getDescription() << std::endl;
+        std::cout << std::endl << "It's you!" << std::endl;
+        std::cout << player->getRepresentation() << std::endl << std::endl;
         player->getCurrentRoom()->printExits();
     } else {
         std::cout << "You can't go that way." << std::endl;

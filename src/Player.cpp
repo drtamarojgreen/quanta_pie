@@ -10,3 +10,7 @@ void Player::setCurrentRoom(Room* room) {
 Room* Player::getCurrentRoom() const {
     return currentRoom;
 }
+
+std::string Player::getRepresentation() const {
+    return "  __\n (..)\n-(--)-\n /  \\";
+}
