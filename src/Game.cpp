@@ -2,180 +2,130 @@
 #include "Player.h"
 #include "Room.h"
 #include "Character.h"
+#include "CSVParser.h"
 #include <iostream>
-
-Game::Game() : player(nullptr), gameOver(false) {
-    createWorld();
-    // The player will be initialized in createWorld
-}
-
 #include <string>
 #include <vector>
 #include <sstream>
+#include <memory>
+#include <algorithm> // Required for std::transform
+#include <cctype>    // Required for ::tolower
 
-// Helper function to extract values from an SQL INSERT statement.
-// This is a simple parser and not robust for general SQL.
-std::vector<std::string> parseValues(const std::string& line) {
-    std::vector<std::string> values;
-    size_t start = line.find('(');
-    size_t end = line.find(')');
-    if (start == std::string::npos || end == std::string::npos) {
-        return values;
-    }
-    std::string content = line.substr(start + 1, end - start - 1);
-    std::stringstream ss(content);
-    std::string value;
-    while (std::getline(ss, value, ',')) {
-        // Trim leading whitespace
-        size_t first = value.find_first_not_of(" \t\n\r");
-        if (std::string::npos != first) {
-            value = value.substr(first);
-        }
-        // Trim trailing whitespace
-        size_t last = value.find_last_not_of(" \t\n\r");
-        if (std::string::npos != last) {
-            value = value.substr(0, last + 1);
-        }
-        // Remove single quotes if they exist
-        if (value.front() == '\'' && value.back() == '\'') {
-            value = value.substr(1, value.length() - 2);
-        }
-        values.push_back(value);
-    }
-    return values;
+Game::Game() : player(nullptr), gameOver(false) {
+    createWorld("sql/game_data.sql"); // This will be ignored now, but keeping for compatibility
 }
 
-
-Game::~Game() {
-    delete player;
-    for (auto room : allRooms) {
-        delete room;
-    }
-    for (auto character : allCharacters) {
-        delete character;
-    // The 'player' pointer is a reference to an object within 'allPlayers',
-    // so it should not be deleted separately.
-    for (auto p : allPlayers) {
-        delete p;
-    }
-    for (auto r : allRooms) {
-        delete r;
-    }
-    for (auto gs : allGameSessions) {
-        delete gs;
-    }
-    for (auto s : allScores) {
-        delete s;
-    }
+Game::Game(const std::string& sql_file_path) : player(nullptr), gameOver(false) {
+    createWorld(sql_file_path); // This will be ignored now, but keeping for compatibility
 }
 
-void Game::createWorld() {
-    // Load room data from the SQL file
-    // Load all game data from the SQL file
-    loadDataFromSQL("sql/game_data.sql");
+// Destructor is now defaulted in Game.h due to unique_ptr usage
+
+void Game::createWorld(const std::string& sql_file_path) {
+    // Load all game data from the CSV files
+    loadDataFromCSV();
 
     // Assign the first loaded player as the main player character.
     if (!allPlayers.empty()) {
-        player = allPlayers[0];
+        player = std::move(allPlayers[0]); // Transfer ownership
         // Assign the first loaded room as the starting location for the main player.
         if (!allRooms.empty()) {
-            player->setCurrentRoom(allRooms[0]);
+            player->setCurrentRoom(allRooms[0].get()); // Pass raw pointer to Room
         }
     } else {
         // Fallback: if no players or rooms are loaded, create defaults.
         if (allRooms.empty()) {
-            Room* defaultRoom = new Room("A non-descript, empty void.");
-            allRooms.push_back(defaultRoom);
+            allRooms.push_back(std::make_unique<Room>("A non-descript, empty void."));
         }
-        player = new Player(0, "Default Player", "unknown", allRooms[0]);
-        allPlayers.push_back(player);
+        player = std::make_unique<Player>(0, "Default Player", "unknown", allRooms[0].get());
+        allPlayers.push_back(std::move(player)); // Add to allPlayers, then move back to player
+        player = std::move(allPlayers[0]);
     }
 }
 
-void Game::loadDataFromSQL(const std::string& filename) {
-    std::ifstream sqlFile(filename);
-    if (!sqlFile.is_open()) {
-        return;
+void Game::loadDataFromCSV() {
+    // Load Rooms
+    std::vector<std::vector<std::string>> roomData = CSVParser::readCSV("sql/rooms.csv");
+    std::cout << "Loading Rooms..." << std::endl;
+    for (size_t i = 1; i < roomData.size(); ++i) { // Skip header row
+        if (roomData[i].size() > 1) {
+            std::cout << "Room Description: " << roomData[i][1] << std::endl;
+            allRooms.push_back(std::make_unique<Room>(roomData[i][1]));
+        } else {
+            std::cerr << "Error: Malformed room data at row " << i << std::endl;
+        }
     }
 
-    std::string line;
-    while (std::getline(sqlFile, line)) {
-        // A simple check for the INSERT statement for rooms
-        if (line.find("INSERT INTO rooms") != std::string::npos) {
-            // This is a very fragile parser. It assumes the format:
-            // INSERT INTO rooms (room_id, description, ascii_art) VALUES (1, 'description text', 'ascii art');
-
-            // Find the description between the first and second single quotes
-            size_t firstQuote = line.find('\'');
-            if (firstQuote == std::string::npos) continue;
-            size_t secondQuote = line.find('\'', firstQuote + 1);
-            if (secondQuote == std::string::npos) continue;
-
-            std::string description = line.substr(firstQuote + 1, secondQuote - firstQuote - 1);
-
-            // The Room class currently only supports a description.
-            Room* newRoom = new Room(description);
-            allRooms.push_back(newRoom);
-        } else if (line.find("INSERT INTO characters") != std::string::npos) {
-            // This parser is also very fragile and assumes the exact format from sql/game_data.sql
-            // INSERT INTO characters (..., name, description, initial_room_id, dialogue) VALUES (..., 'name', 'desc', room_id, 'dialogue');
-
-            size_t firstQuote = line.find('\'');
-            if (firstQuote == std::string::npos) continue;
-            size_t secondQuote = line.find('\'', firstQuote + 1);
-            if (secondQuote == std::string::npos) continue;
-            std::string name = line.substr(firstQuote + 1, secondQuote - firstQuote - 1);
-
-            size_t thirdQuote = line.find('\'', secondQuote + 1);
-            if (thirdQuote == std::string::npos) continue;
-            size_t fourthQuote = line.find('\'', thirdQuote + 1);
-            if (fourthQuote == std::string::npos) continue;
-            std::string description = line.substr(thirdQuote + 1, fourthQuote - thirdQuote - 1);
-
-            size_t commaAfterDesc = line.find(',', fourthQuote + 1);
-            if (commaAfterDesc == std::string::npos) continue;
-            size_t commaAfterRoomId = line.find(',', commaAfterDesc + 1);
-            if (commaAfterRoomId == std::string::npos) continue;
-
-            // Trim whitespace from the beginning of the string
-            size_t firstDigit = line.find_first_of("0123456789", commaAfterDesc);
-            if (firstDigit == std::string::npos) continue;
-
-            std::string roomIdStr = line.substr(firstDigit, commaAfterRoomId - firstDigit);
-            int roomId = std::stoi(roomIdStr);
-
-            size_t fifthQuote = line.find('\'', commaAfterRoomId + 1);
-            if (fifthQuote == std::string::npos) continue;
-            size_t sixthQuote = line.find('\'', fifthQuote + 1);
-            if (sixthQuote == std::string::npos) continue;
-            std::string dialogue = line.substr(fifthQuote + 1, sixthQuote - fifthQuote - 1);
-
-            Character* newCharacter = new Character(name, description, dialogue);
-            allCharacters.push_back(newCharacter);
-
-            if (roomId > 0 && roomId <= allRooms.size()) {
-                allRooms[roomId - 1]->addCharacter(newCharacter);
-        if (line.find("INSERT INTO players") != std::string::npos) {
-            std::vector<std::string> values = parseValues(line);
-            if (values.size() == 3) {
-                allPlayers.push_back(new Player(std::stoi(values[0]), values[1], values[2], nullptr));
+    // Load Characters
+    std::vector<std::vector<std::string>> characterData = CSVParser::readCSV("sql/characters.csv");
+    std::cout << "Loading Characters..." << std::endl;
+    for (size_t i = 1; i < characterData.size(); ++i) { // Skip header row
+        if (characterData[i].size() > 4) {
+            std::string name = characterData[i][1];
+            std::string description = characterData[i][2];
+            int initialRoomId = std::stoi(characterData[i][3]);
+            std::string dialogue = characterData[i][4];
+            std::cout << "Character Name: " << name << ", Description: " << description << ", Dialogue: " << dialogue << std::endl;
+            auto newCharacter = std::make_unique<Character>(name, description, dialogue);
+            if (initialRoomId > 0 && initialRoomId <= allRooms.size()) {
+                allRooms[initialRoomId - 1]->addCharacter(newCharacter.get()); // Pass raw pointer to Room
             }
-        } else if (line.find("INSERT INTO game_sessions") != std::string::npos) {
-            std::vector<std::string> values = parseValues(line);
-            if (values.size() == 4) {
-                allGameSessions.push_back(new GameSession(std::stoi(values[0]), values[1], values[2], values[3]));
+            allCharacters.push_back(std::move(newCharacter));
+        } else {
+            std::cerr << "Error: Malformed character data at row " << i << std::endl;
+        }
+    }
+
+    // Load Players
+    std::vector<std::vector<std::string>> playerData = CSVParser::readCSV("sql/players.csv");
+    std::cout << "Loading Players..." << std::endl;
+    for (size_t i = 1; i < playerData.size(); ++i) { // Skip header row
+        if (playerData[i].size() > 2) {
+            allPlayers.push_back(std::make_unique<Player>(std::stoi(playerData[i][0]), playerData[i][1], playerData[i][2], nullptr));
+        } else {
+            std::cerr << "Error: Malformed player data at row " << i << std::endl;
+        }
+    }
+
+    // Load Game Sessions
+    std::vector<std::vector<std::string>> gameSessionData = CSVParser::readCSV("sql/game_sessions.csv");
+    std::cout << "Loading Game Sessions..." << std::endl;
+    for (size_t i = 1; i < gameSessionData.size(); ++i) { // Skip header row
+        if (gameSessionData[i].size() > 3) {
+            allGameSessions.push_back(std::make_unique<GameSession>(std::stoi(gameSessionData[i][0]), gameSessionData[i][1], gameSessionData[i][2], gameSessionData[i][3]));
+        } else {
+            std::cerr << "Error: Malformed game session data at row " << i << std::endl;
+        }
+    }
+
+    // Load Scores
+    std::vector<std::vector<std::string>> scoreData = CSVParser::readCSV("sql/scores.csv");
+    std::cout << "Loading Scores..." << std::endl;
+    for (size_t i = 1; i < scoreData.size(); ++i) { // Skip header row
+        if (scoreData[i].size() > 3) {
+            allScores.push_back(std::make_unique<Score>(std::stoi(scoreData[i][0]), std::stoi(scoreData[i][1]), std::stoi(scoreData[i][2]), std::stoi(scoreData[i][3])));
+        } else {
+            std::cerr << "Error: Malformed score data at row " << i << std::endl;
+        }
+    }
+
+    // Load Exits (after all rooms are loaded)
+    std::vector<std::vector<std::string>> exitData = CSVParser::readCSV("sql/exits.csv");
+    std::cout << "Loading Exits..." << std::endl;
+    for (size_t i = 1; i < exitData.size(); ++i) { // Skip header row
+        if (exitData[i].size() > 3) {
+            int fromRoomId = std::stoi(exitData[i][1]);
+            int toRoomId = std::stoi(exitData[i][2]);
+            std::string direction = exitData[i][3];
+
+            if (fromRoomId > 0 && fromRoomId <= allRooms.size() &&
+                toRoomId > 0 && toRoomId <= allRooms.size()) {
+                allRooms[fromRoomId - 1]->addExit(direction, allRooms[toRoomId - 1].get());
+            } else {
+                std::cerr << "Error: Invalid room ID in exit data at row " << i << std::endl;
             }
-        } else if (line.find("INSERT INTO scores") != std::string::npos) {
-            std::vector<std::string> values = parseValues(line);
-            if (values.size() == 4) {
-                allScores.push_back(new Score(std::stoi(values[0]), std::stoi(values[1]), std::stoi(values[2]), std::stoi(values[3])));
-            }
-        } else if (line.find("INSERT INTO rooms") != std::string::npos) {
-            std::vector<std::string> values = parseValues(line);
-            // The rooms table has description and ascii art, we only use description
-            if (values.size() >= 2) {
-                allRooms.push_back(new Room(values[1]));
-            }
+        } else {
+            std::cerr << "Error: Malformed exit data at row " << i << std::endl;
         }
     }
 }
@@ -225,9 +175,61 @@ void Game::printHelp() {
     std::cout << std::endl;
 }
 
+void Game::printSidePanel() {
+    if (!player) return;
+
+    Room* currentRoom = player->getCurrentRoom();
+
+    // Clear screen (platform-specific, for simplicity, just print newlines)
+    // For a true clear screen, platform-specific calls like system("cls") or system("clear") would be needed,
+    // but are generally avoided in portable C++ applications.
+    for (int i = 0; i < 50; ++i) {
+        std::cout << std::endl;
+    }
+
+    std::cout << "----------------------------------------" << std::endl;
+    std::cout << "               GAME INFO                " << std::endl;
+    std::cout << "----------------------------------------" << std::endl;
+    std::cout << "Score: " << player->getScore() << std::endl;
+    std::cout << "----------------------------------------" << std::endl;
+    std::cout << "               HELP                     " << std::endl;
+    std::cout << "  - up/north, down/south, left/west, right/east to move." << std::endl;
+    std::cout << "  - 'look': Look around." << std::endl;
+    std::cout << "  - 'dance': Do a jig." << std::endl;
+    std::cout << "  - 'help': Show commands." << std::endl;
+    std::cout << "  - 'quit': Exit game." << std::endl;
+    std::cout << "----------------------------------------" << std::endl;
+    std::cout << "               MAP                      " << std::endl;
+    std::cout << "----------------------------------------" << std::endl;
+
+    // Simple map representation
+    // This assumes a grid-like layout, which might not be true for all room connections.
+    // For a more accurate map, a graph traversal and rendering would be needed.
+    // For now, just show current room and direct exits.
+    std::map<std::string, Room*> exits = currentRoom->getAllExits();
+
+    std::cout << "       ";
+    if (exits.count("north")) std::cout << "[ ]"; else std::cout << "   ";
+    std::cout << std::endl;
+    std::cout << "       |" << std::endl;
+    std::cout << "       |" << std::endl;
+    if (exits.count("west")) std::cout << "[ ]---"; else std::cout << "      ";
+    std::cout << "[X]"; // Current room
+    if (exits.count("east")) std::cout << "---[ ]";
+    std::cout << std::endl;
+    std::cout << "       |" << std::endl;
+    std::cout << "       |" << std::endl;
+    std::cout << "       ";
+    if (exits.count("south")) std::cout << "[ ]"; else std::cout << "   ";
+    std::cout << std::endl;
+
+    std::cout << "----------------------------------------" << std::endl;
+}
+
 void Game::gameLoop() {
     std::string input;
     while (!gameOver) {
+        printSidePanel(); // Display side panel at the beginning of each loop
         std::cout << "> ";
         std::getline(std::cin, input);
 
@@ -244,20 +246,33 @@ void Game::gameLoop() {
 void Game::processInput(const std::string& input) {
     if (!player) return;
 
-    if (input == "help") {
+    std::string lowerInput = input;
+    // Convert input to lowercase for case-insensitive comparison
+    std::transform(lowerInput.begin(), lowerInput.end(), lowerInput.begin(), ::tolower);
+
+    if (lowerInput == "help") {
         printHelp();
-    } else if (input == "look") {
+    } else if (lowerInput == "look") {
         printCurrentRoomInfo();
-    } else if (input == "dance") {
+    } else if (lowerInput == "dance") {
         std::cout << "You do a little jig. It's surprisingly uplifting." << std::endl;
+    } else if (lowerInput == "up") {
+        processInput("north"); // Map 'up' to 'north'
+    } else if (lowerInput == "down") {
+        processInput("south"); // Map 'down' to 'south'
+    } else if (lowerInput == "left") {
+        processInput("west"); // Map 'left' to 'west'
+    } else if (lowerInput == "right") {
+        processInput("east"); // Map 'right' to 'east'
     }
     else {
         // Try to move
         Room* current = player->getCurrentRoom();
-        Room* nextRoom = current->getExit(input);
+        Room* nextRoom = current->getExit(lowerInput); // Use lowerInput for direction
 
         if (nextRoom != nullptr) {
             player->setCurrentRoom(nextRoom);
+            player->incrementScore(); // Increment score on successful move
             printCurrentRoomInfo();
         } else {
             std::cout << "You can't go that way. Type 'help' for a list of commands." << std::endl;

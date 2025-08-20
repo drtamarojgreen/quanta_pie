@@ -4,17 +4,12 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <memory> // For std::unique_ptr
 #include "Player.h"
 #include "Room.h"
 #include "GameSession.h"
 #include "Score.h"
-
-// Forward declarations are no longer needed for Player and Room
-// as we are now including the full headers.
-// Forward declarations
-class Player;
-class Room;
-class Character;
+#include "Character.h" // Include full definition of Character
 
 /**
  * @class Game
@@ -32,9 +27,14 @@ public:
     Game();
 
     /**
+     * @brief Constructs a new Game object with a custom SQL file.
+     */
+    Game(const std::string& sql_file_path);
+
+    /**
      * @brief Destroys the Game object, cleaning up allocated resources.
      */
-    ~Game();
+    ~Game() = default; // With unique_ptr, default destructor is fine
 
     /**
      * @brief Starts the game, displaying the welcome message and beginning the main loop.
@@ -42,23 +42,21 @@ public:
     void start();
 
 private:
-    void createWorld();
+    void createWorld(const std::string& sql_file_path);
     void gameLoop();
     void processInput(const std::string& input);
     void printWelcomeMessage();
     void printHelp();
-    void loadDataFromSQL(const std::string& filename);
+    void loadDataFromCSV();
     void printCurrentRoomInfo();
+    void printSidePanel(); // New function for side panel display
 
-    Player* player; // The main player character
-    std::vector<Room*> allRooms;
-    std::vector<Player*> allPlayers;
-    std::vector<GameSession*> allGameSessions;
-    std::vector<Score*> allScores;
-
-    Player* player;
-    std::vector<Room*> allRooms;
-    std::vector<Character*> allCharacters;
+    std::unique_ptr<Player> player; // The main player character
+    std::vector<std::unique_ptr<Room>> allRooms;
+    std::vector<std::unique_ptr<Player>> allPlayers;
+    std::vector<std::unique_ptr<GameSession>> allGameSessions;
+    std::vector<std::unique_ptr<Score>> allScores;
+    std::vector<std::unique_ptr<Character>> allCharacters;
     bool gameOver;
 };
 

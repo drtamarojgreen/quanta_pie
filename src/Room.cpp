@@ -27,6 +27,10 @@ const std::vector<Character*>& Room::getCharacters() const {
     return characters;
 }
 
+const std::map<std::string, Room*>& Room::getAllExits() const {
+    return exits;
+}
+
 void Room::printExits() const {
     std::cout << "Available exits:";
     for (auto const& [direction, room] : exits) {

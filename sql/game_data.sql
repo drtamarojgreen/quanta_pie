@@ -13,18 +13,75 @@
 --   - description (STRING)
 --   - ascii_art (STRING)
 --
-INSERT INTO rooms (room_id, description, ascii_art) VALUES (1, 'You are in the Library of Core Beliefs. Ancient, sturdy shelves hold the foundational ideas that shape your world. Some books glow with a warm, steady light, while others are heavy and bound in shadow. This is where your fundamental understanding of yourself and the world resides.', '   _______\n  /      /,\n /      //\n/______//\n(______(/');
-INSERT INTO rooms (room_id, description, ascii_art) VALUES (2, 'You have entered the Archives of Automatic Thoughts. Here, fleeting thoughts and immediate reactions are recorded on endless scrolls that zip by on brass tracks. Most are mundane, but some are inscribed with heavily biased or critical ink.', '||||||||\n|      |\n|      |\n||||||||');
-INSERT INTO rooms (room_id, description, ascii_art) VALUES (3, 'This is the Quiet Nook of Mindfulness. A comfortable chair sits before a calm, steady hearth. The air is still and quiet. This is a space for non-judgmental observation of your thoughts and feelings as they are.', '  )  (\n /`--`\\\n|      |\n|______|');
-INSERT INTO rooms (room_id, description, ascii_art) VALUES (4, 'You are in the Grand Hall of Social Interactions. Echoes of past conversations hang in the air. The space is vast and can feel either welcoming or intimidating depending on the light, which shifts with your mood.', '   | |         | |\n|  | | |     | | |  |\n|  | | |     | | |  |\n|__| |_|_____|_| |__|\n(____________________)');
-INSERT INTO rooms (room_id, description, ascii_art) VALUES (5, 'This is the Kitchen of Physical Sensations. The smells of different foods and the feeling of warmth from the stove connect you to your body. This room reminds you of the link between physical well-being and emotional states.', ',-----------.\n|]         [|\n|           |\n|___________|\n|o|       |o|\n|=|       |=|');
-INSERT INTO rooms (room_id, description, ascii_art) VALUES (6, 'You''ve entered the Room of Cognitive Distortions. The walls seem to twist and shimmer, presenting funhouse-mirror reflections of reality. Whispers of all-or-nothing thinking, overgeneralization, and catastrophizing echo from the corners. This room is uncomfortable, but understanding it is key.', '/`-.--`-.\n| o| o |\n`-/`--`\\\n  |     |\n /|     |\\\n/ |     | \\\n`=` `---` `=`');
-INSERT INTO rooms (room_id, description, ascii_art) VALUES (7, 'You are in the Observatory of Perspective. A large, clear lens allows you to look out at your own thoughts and situations from a detached, higher vantage point. From here, problems that seemed immense can look manageable.', '   .---.\n  /     \\\n |       |\n |   o   |\n/|/\\   /|\\\n( |  `=`  | )\n`|_______|`');
-INSERT INTO rooms (room_id, description, ascii_art) VALUES (8, 'This is the Workshop of Coping Strategies. Workbenches are covered with tools for managing difficult emotions and situations. Here you can find plans for deep breathing, grounding exercises, and problem-solving.', '|` |` |` |\n|-`|-`|-`|\n|  |  |  |\n(-----)  |\n| | | |  |\n|_|_|_|__|');
-INSERT INTO rooms (room_id, description, ascii_art) VALUES (9, 'You are in the Laboratory of Behavioral Experiments. This room is for testing beliefs and assumptions by taking action. It''s a safe space to try new things and see if the predicted negative outcomes actually occur.', '  .---.\n (     )\n  `---`\n /  |  \\\n(   |   )\n `--`--`');
-INSERT INTO rooms (room_id, description, ascii_art) VALUES (10, 'You have found the Flooded Cavern of Emotions. A deep, calm pool of water reflects the glowing moss on the ceiling. This room represents the full spectrum of your emotions. The water can be calm or turbulent, but it is always just water.', ',^,^,^,^,\n/         \\\n(           )\n~~~~~~~~~~~~~~~~~\n~~~~~~~~~~~~~~~~~\n(___________)');
-INSERT INTO rooms (room_id, description, ascii_art) VALUES (11, 'This is the Throne Room of the Self. A simple, comfortable chair sits on a modest platform. This is the seat of your executive function, where you make conscious choices and decisions. It is a place of self-acceptance and agency.', '  |---|\n /     \\\n|  _|_  |\n| (___) |\n|_______|');
-INSERT INTO rooms (room_id, description, ascii_art) VALUES (12, 'You are in the Whispering Gallery of Others'' Perspectives. Faint whispers move along the curved walls, allowing you to hear empathetic echoes of how others might feel or think in a given situation. It is a place to practice empathy.', '/`--------`\\\n/           \\\n/             \\\n(               )\n(               )\n\\             /\n \\           /\n  `---------`');
+INSERT INTO rooms (room_id, description, ascii_art) VALUES (1, 'You are in the Library of Core Beliefs. Ancient, sturdy shelves hold the foundational ideas that shape your world. Some books glow with a warm, steady light, while others are heavy and bound in shadow. This is where your fundamental understanding of yourself and the world resides.', '   _______
+  /      /,
+ /      //
+/______//
+(______(/');
+INSERT INTO rooms (room_id, description, ascii_art) VALUES (2, 'You have entered the Archives of Automatic Thoughts. Here, fleeting thoughts and immediate reactions are recorded on endless scrolls that zip by on brass tracks. Most are mundane, but some are inscribed with heavily biased or critical ink.', '||||||||
+|      |
+|      |
+||||||||');
+INSERT INTO rooms (room_id, description, ascii_art) VALUES (3, 'This is the Quiet Nook of Mindfulness. A comfortable chair sits before a calm, steady hearth. The air is still and quiet. This is a space for non-judgmental observation of your thoughts and feelings as they are.', '  )  (
+ /`--`\
+|      |
+|______|');
+INSERT INTO rooms (room_id, description, ascii_art) VALUES (4, 'You are in the Grand Hall of Social Interactions. Echoes of past conversations hang in the air. The space is vast and can feel either welcoming or intimidating depending on the light, which shifts with your mood.', '   | |         | |
+|  | | |     | | |  |
+|  | | |     | | |  |
+|__| |_|_____|_| |__| 
+(____________________)');
+INSERT INTO rooms (room_id, description, ascii_art) VALUES (5, 'This is the Kitchen of Physical Sensations. The smells of different foods and the feeling of warmth from the stove connect you to your body. This room reminds you of the link between physical well-being and emotional states.', ',-----------.
+|]         [|
+|           |
+|___________|
+|o|       |o|
+|=|       |=|');
+INSERT INTO rooms (room_id, description, ascii_art) VALUES (6, 'You''ve entered the Room of Cognitive Distortions. The walls seem to twist and shimmer, presenting funhouse-mirror reflections of reality. Whispers of all-or-nothing thinking, overgeneralization, and catastrophizing echo from the corners. This room is uncomfortable, but understanding it is key.', '/`-.--`-.
+| o| o |
+`-/`--`\
+  |     |
+ /|     |\
+/ |     | \
+`=` `---` =`');
+INSERT INTO rooms (room_id, description, ascii_art) VALUES (7, 'You are in the Observatory of Perspective. A large, clear lens allows you to look out at your own thoughts and situations from a detached, higher vantage point. From here, problems that seemed immense can look manageable.', '   .---.
+  /     \
+ |       |
+ |   o   |
+/|/\   /|\
+( |  `=`  | )
+`|_______|`');
+INSERT INTO rooms (room_id, description, ascii_art) VALUES (8, 'This is the Workshop of Coping Strategies. Workbenches are covered with tools for managing difficult emotions and situations. Here you can find plans for deep breathing, grounding exercises, and problem-solving.', '|` |` |` |
+|-`|-`|-`|
+|  |  |  |
+(-----)  |
+| | | |  |
+|_|_|_|__|');
+INSERT INTO rooms (room_id, description, ascii_art) VALUES (9, 'You are in the Laboratory of Behavioral Experiments. This room is for testing beliefs and assumptions by taking action. It''s a safe space to try new things and see if the predicted negative outcomes actually occur.', '  .---.
+ (     )
+  `---`
+ /  |  \
+(   |   )
+ `--`--`');
+INSERT INTO rooms (room_id, description, ascii_art) VALUES (10, 'You have found the Flooded Cavern of Emotions. A deep, calm pool of water reflects the glowing moss on the ceiling. This room represents the full spectrum of your emotions. The water can be calm or turbulent, but it is always just water.', ',^,^,^,^,
+/         \
+(           )
+~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
+(___________)');
+INSERT INTO rooms (room_id, description, ascii_art) VALUES (11, 'This is the Throne Room of the Self. A simple, comfortable chair sits on a modest platform. This is the seat of your executive function, where you make conscious choices and decisions. It is a place of self-acceptance and agency.', '  |---| 
+ /     \
+|  _|_  |
+| (___) |
+|_______|');
+INSERT INTO rooms (room_id, description, ascii_art) VALUES (12, 'You are in the Whispering Gallery of Others'' Perspectives. Faint whispers move along the curved walls, allowing you to hear empathetic echoes of how others might feel or think in a given situation. It is a place to practice empathy.', '/`--------`\
+/           \
+/             \
+(               )
+(               )
+\             /
+ \           /
+  `---------`');
 
 --
 -- Collection: room_objects
@@ -88,7 +145,7 @@ INSERT INTO exits (exit_id, from_room_id, to_room_id, direction, description, is
 -- Grand Hall of Social Interactions <-> Throne Room of the Self
 INSERT INTO exits (exit_id, from_room_id, to_room_id, direction, description, is_locked, key_tool_id) VALUES (11, 4, 11, 'south', 'A pair of simple, elegant doors lead to the throne room of the self.', FALSE, NULL);
 INSERT INTO exits (exit_id, from_room_id, to_room_id, direction, description, is_locked, key_tool_id) VALUES (12, 11, 4, 'north', 'A pair of simple, elegant doors lead back to the grand hall.', FALSE, NULL);
--- Archives of Automatic Thoughts <-> Whispering Gallery of Others' Perspectives
+-- Archives of Automatic Thoughts <-> Whispering Gallery of Others'' Perspectives
 INSERT INTO exits (exit_id, from_room_id, to_room_id, direction, description, is_locked, key_tool_id) VALUES (13, 2, 12, 'west', 'A narrow, curved hallway disappears to the west.', FALSE, NULL);
 INSERT INTO exits (exit_id, from_room_id, to_room_id, direction, description, is_locked, key_tool_id) VALUES (14, 12, 2, 'east', 'The curved hallway opens back into the archives.', FALSE, NULL);
 -- Whispering Gallery <-> Laboratory of Behavioral Experiments (LOCKED)
@@ -145,21 +202,3 @@ INSERT INTO scores (score_id, player_id, session_id, score) VALUES (1003, 2, 102
 INSERT INTO scores (score_id, player_id, session_id, score) VALUES (1004, 3, 102, 15);
 INSERT INTO scores (score_id, player_id, session_id, score) VALUES (1005, 1, 103, 12);
 INSERT INTO scores (score_id, player_id, session_id, score) VALUES (1006, 3, 103, 8);
-
---
--- Assumed Schema for Rooms
---
--- Collection: rooms
--- Description: Stores information about each room in the game world.
--- Fields:
---   - room_id (NUMBER, PRIMARY KEY)
---   - description (STRING)
---   - ascii_art (STRING)
---
-
---
--- Insert data into the 'rooms' collection
---
-INSERT INTO rooms (room_id, description, ascii_art) VALUES (1, 'You find yourself in a vast, circular library, its towering shelves carved from a single, colossal petrified tree. The air hums with a faint, magical resonance, and the only light filters down from glowing crystals embedded in the ceiling, illuminating a massive, rune-etched obsidian desk at the room''s heart.', '   _______\n  /      /,\n /      //\n/______//\n(______(/');
-INSERT INTO rooms (room_id, description, ascii_art) VALUES (2, 'The air is thick with the scent of ancient paper and preservation wards. You are in the archives, a labyrinth of impossibly tall shelves that disappear into the gloom above. Each shelf is crammed with scrolls, codices, and leather-bound tomes, their spines either blank or marked with cryptic symbols that seem to shift when you''re not looking directly at them.', '||||||||\n|      |\n|      |\n||||||||');
-INSERT INTO rooms (room_id, description, ascii_art) VALUES (3, 'Tucked away behind a tapestry depicting a forgotten battle, you discover a hidden nook. A plush, high-backed armchair sits before a fireplace where the flames burn a soothing, ethereal blue. A small, floating orb of light provides perfect illumination for reading, and the gentle crackling of the fire is the only sound.', '  )  (\n /`--`\\\n|      |\n|______|');

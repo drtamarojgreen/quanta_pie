@@ -60,6 +60,7 @@ public:
      * @return A constant reference to the vector of characters in the room.
      */
     const std::vector<Character*>& getCharacters() const;
+    const std::map<std::string, Room*>& getAllExits() const; // New function to get all exits
 
 private:
     std::string description;

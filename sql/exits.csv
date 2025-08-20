@@ -1,0 +1,23 @@
+exit_id,from_room_id,to_room_id,direction,description,is_locked,key_tool_id
+1,1,2,north,"An archway leads to the bustling archives.",FALSE,
+2,2,1,south,"An archway leads back to the quiet library.",FALSE,
+3,1,3,east,"A quiet curtain conceals a passage to a place of mindfulness.",FALSE,
+4,3,1,west,"A quiet curtain conceals a passage back to the library.",FALSE,
+5,1,4,down,"A grand staircase descends into the hall of social interactions.",FALSE,
+6,4,1,up,"A grand staircase ascends to the library of core beliefs.",FALSE,
+7,4,5,east,"A swinging door leads into the kitchen of physical sensations.",FALSE,
+8,5,4,west,"A swinging door leads back to the grand hall.",FALSE,
+9,4,8,north,"A sturdy door opens into the workshop of coping strategies.",FALSE,
+10,8,4,south,"A sturdy door opens back into the grand hall.",FALSE,
+11,4,11,south,"A pair of simple, elegant doors lead to the throne room of the self.",FALSE,
+12,11,4,north,"A pair of simple, elegant doors lead back to the grand hall.",FALSE,
+13,2,12,west,"A narrow, curved hallway disappears to the west.",FALSE,
+14,12,2,east,"The curved hallway opens back into the archives.",FALSE,
+15,12,9,north,"A door that requires the Key of Awareness to open.",TRUE,1
+16,9,12,south,"A door sealed by a lack of awareness.",TRUE,1
+17,8,6,down,"A heavy door, locked by avoidance. It requires the Key of Values to proceed.",TRUE,8
+18,6,8,up,"The heavy door is locked from this side, requiring you to align with your values.",TRUE,8
+19,11,7,up,"A hidden spiral staircase ascends towards a new perspective.",FALSE,
+20,7,11,down,"A spiral staircase descends back to the seat of self.",FALSE,
+21,9,10,east,"A crack in the wall leads to the cavern of emotions.",FALSE,
+22,10,9,west,"A narrow crack in the wall leads back to the lab.",FALSE,
