@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <fstream>
 
 // Forward declarations
 class Player;
@@ -39,6 +40,7 @@ private:
     void processInput(const std::string& input);
     void printWelcomeMessage();
     void printHelp();
+    void loadDataFromSQL(const std::string& filename);
 
     Player* player;
     std::vector<Room*> allRooms;
