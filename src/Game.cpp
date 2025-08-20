@@ -1,21 +1,27 @@
 #include "Game.h"
 #include "Player.h"
-#include "Room.h"
+#include "Map.h"
 #include <iostream>
+#include <vector>
+#include <cmath> // For std::cos, std::sin
 
-Game::Game() : player(nullptr), gameOver(false) {
+// Game class members definitions for screen dimensions
+const int Game::screenWidth;
+const int Game::screenHeight;
+
+Game::Game() : player(nullptr), map(nullptr), gameOver(false), score(0) {
     createWorld();
-    // The player will be initialized in createWorld
 }
 
 Game::~Game() {
     delete player;
-    for (auto room : allRooms) {
-        delete room;
-    }
+    delete map;
 }
 
 void Game::createWorld() {
+    map = new Map();
+    // Place player in a valid starting position
+    player = new Player(3.5, 3.5);
     // Load room data from the SQL file
     loadDataFromSQL("sql/game_data.sql");
 
@@ -79,40 +85,24 @@ void Game::loadDataFromSQL(const std::string& filename) {
 
 void Game::start() {
     printWelcomeMessage();
+    render(); // Initial render
     gameLoop();
 }
 
 void Game::printWelcomeMessage() {
-    std::cout << "Welcome to Quanta_Pie!" << std::endl;
+    std::cout << "Welcome to the Raycaster Game!" << std::endl;
     std::cout << "----------------------------------------" << std::endl;
-    if (player) {
-        std::cout << player->getCurrentRoom()->getDescription() << std::endl;
-        std::cout << std::endl << "It's you!" << std::endl;
-        std::cout << player->getRepresentation() << std::endl << std::endl;
-        player->getCurrentRoom()->printExits();
-    }
-    printHelp();
-}
-
-void Game::printHelp() {
-    std::cout << std::endl;
-    std::cout << "--- Game Commands ---" << std::endl;
-    std::cout << "  - [direction]: Type 'north', 'south', 'east', or 'west' to move." << std::endl;
-    std::cout << "  - 'look':         Look around the room again." << std::endl;
-    std::cout << "  - 'dance':        Do a little dance." << std::endl;
-    std::cout << "  - 'help':         Show this list of commands." << std::endl;
-    std::cout << "  - 'quit':         Exit the game." << std::endl;
-    std::cout << "---------------------" << std::endl;
-    std::cout << std::endl;
 }
 
 void Game::gameLoop() {
     char input = ' ';
     const double moveSpeed = 0.2;
     const double rotSpeed = 0.1;
+    bool hasMoved = false;
 
     while (!gameOver) {
         std::cin >> input;
+        hasMoved = false;
 
         if (input == 'q') {
             gameOver = true;
@@ -123,16 +113,16 @@ void Game::gameLoop() {
         if (input == 'w') {
             double newX = player->x + player->dirX * moveSpeed;
             double newY = player->y + player->dirY * moveSpeed;
-            // Collision detection
             if (map->getTile(int(newX), int(player->y)) != '#') player->x = newX;
             if (map->getTile(int(player->x), int(newY)) != '#') player->y = newY;
+            hasMoved = true;
         }
         if (input == 's') {
             double newX = player->x - player->dirX * moveSpeed;
             double newY = player->y - player->dirY * moveSpeed;
-            // Collision detection
             if (map->getTile(int(newX), int(player->y)) != '#') player->x = newX;
             if (map->getTile(int(player->x), int(newY)) != '#') player->y = newY;
+            hasMoved = true;
         }
 
         // --- Rotation ---
@@ -143,6 +133,7 @@ void Game::gameLoop() {
             double oldPlaneX = player->planeX;
             player->planeX = player->planeX * cos(-rotSpeed) - player->planeY * sin(-rotSpeed);
             player->planeY = oldPlaneX * sin(-rotSpeed) + player->planeY * cos(-rotSpeed);
+            hasMoved = true;
         }
         if (input == 'a') { // Turn left
             double oldDirX = player->dirX;
@@ -151,18 +142,19 @@ void Game::gameLoop() {
             double oldPlaneX = player->planeX;
             player->planeX = player->planeX * cos(rotSpeed) - player->planeY * sin(rotSpeed);
             player->planeY = oldPlaneX * sin(rotSpeed) + player->planeY * cos(rotSpeed);
+            hasMoved = true;
         }
 
-        if (input == 'w' || input == 's' || input == 'a' || 'd') {
+        if (hasMoved) {
+            score++; // Increment score on any valid move/turn
             render();
-            std::cout << "Controls: W (forward), S (backward), A (turn left), D (turn right), Q (quit)" << std::endl;
         }
     }
-    std::cout << "Game Over!" << std::endl;
+    std::cout << "Game Over! Final Score: " << score << std::endl;
 }
 
 void Game::render() {
-    // Clear console and print the screen buffer
+    // Clear console
     #ifdef _WIN32
         system("cls");
     #else
@@ -170,9 +162,12 @@ void Game::render() {
     #endif
 
     std::vector<std::string> screen(screenHeight, std::string(screenWidth, ' '));
+    const int panelWidth = 20;
+    const int gameWidth = screenWidth - panelWidth;
 
-    for (int x = 0; x < screenWidth; ++x) {
-        double cameraX = 2 * x / double(screenWidth) - 1;
+    // --- Raycasting ---
+    for (int x = 0; x < gameWidth; ++x) {
+        double cameraX = 2 * x / double(gameWidth) - 1; // Recalculate cameraX for game view width
         double rayDirX = player->dirX + player->planeX * cameraX;
         double rayDirY = player->dirY + player->planeY * cameraX;
 
@@ -182,11 +177,8 @@ void Game::render() {
         double deltaDistX = (rayDirX == 0) ? 1e30 : std::abs(1 / rayDirX);
         double deltaDistY = (rayDirY == 0) ? 1e30 : std::abs(1 / rayDirY);
 
-        double sideDistX;
-        double sideDistY;
-
-        int stepX;
-        int stepY;
+        double sideDistX, sideDistY;
+        int stepX, stepY;
 
         if (rayDirX < 0) {
             stepX = -1;
@@ -205,7 +197,6 @@ void Game::render() {
 
         int hit = 0;
         int side;
-
         while (hit == 0) {
             if (sideDistX < sideDistY) {
                 sideDistX += deltaDistX;
@@ -220,11 +211,8 @@ void Game::render() {
         }
 
         double perpWallDist;
-        if (side == 0) {
-            perpWallDist = (sideDistX - deltaDistX);
-        } else {
-            perpWallDist = (sideDistY - deltaDistY);
-        }
+        if (side == 0) perpWallDist = (sideDistX - deltaDistX);
+        else          perpWallDist = (sideDistY - deltaDistY);
 
         int lineHeight = (int)(screenHeight / perpWallDist);
 
@@ -254,6 +242,25 @@ void Game::render() {
         }
     }
 
+    // --- UI Side Panel ---
+    int panelX = gameWidth + 2; // Starting X coordinate for panel text
+
+    // Draw Score
+    std::string scoreHeader = "SCORE";
+    screen[1].replace(panelX, scoreHeader.length(), scoreHeader);
+    std::string scoreValue = std::to_string(score);
+    screen[2].replace(panelX, scoreValue.length(), scoreValue);
+
+    // Draw Controls
+    std::string controlsHeader = "CONTROLS";
+    screen[4].replace(panelX, controlsHeader.length(), controlsHeader);
+    screen[5].replace(panelX, 12, "W: Forward");
+    screen[6].replace(panelX, 13, "S: Backward");
+    screen[7].replace(panelX, 13, "A: Turn Left");
+    screen[8].replace(panelX, 14, "D: Turn Right");
+    screen[9].replace(panelX, 8, "Q: Quit");
+
+    // --- Print Screen Buffer ---
     for (int y = 0; y < screenHeight; ++y) {
         std::cout << screen[y] << std::endl;
     }
