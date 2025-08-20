@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <fstream>
 
 // Forward declarations
 class Player;
@@ -19,6 +20,8 @@ private:
     void gameLoop();
     void render();
     void printWelcomeMessage();
+    void printHelp();
+    void loadDataFromSQL(const std::string& filename);
 
     Player* player;
     Map* map;
