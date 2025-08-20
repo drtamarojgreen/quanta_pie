@@ -49,6 +49,8 @@ void Game::printWelcomeMessage() {
     std::cout << "----------------------------------------" << std::endl;
     if (player) {
         std::cout << player->getCurrentRoom()->getDescription() << std::endl;
+        std::cout << std::endl << "It's you!" << std::endl;
+        std::cout << player->getRepresentation() << std::endl << std::endl;
         player->getCurrentRoom()->printExits();
     }
 }
@@ -74,6 +76,8 @@ void Game::processInput(const std::string& input) {
 
     if (input == "look") {
         std::cout << player->getCurrentRoom()->getDescription() << std::endl;
+        std::cout << std::endl << "It's you!" << std::endl;
+        std::cout << player->getRepresentation() << std::endl << std::endl;
         player->getCurrentRoom()->printExits();
     } else if (input == "inventory" || input == "i") {
         const auto& inventory = player->getInventory();

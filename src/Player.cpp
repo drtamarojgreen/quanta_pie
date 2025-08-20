@@ -28,4 +28,6 @@ void Player::removeItem(const std::string& item) {
     if (it != inventory.end()) {
         inventory.erase(it);
     }
+std::string Player::getRepresentation() const {
+    return "  __\n (..)\n-(--)-\n /  \\";
 }
