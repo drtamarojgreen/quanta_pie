@@ -19,8 +19,11 @@ public:
     /**
      * @brief Constructs a new Room object.
      * @param description A text description of the room.
+     * @param x The x-coordinate of the room in 3D space.
+     * @param y The y-coordinate of the room in 3D space.
+     * @param z The z-coordinate of the room in 3D space.
      */
-    Room(const std::string& description);
+    Room(const std::string& description, int x = 0, int y = 0, int z = 0);
 
     /**
      * @brief Adds an exit to the room.
@@ -43,6 +46,24 @@ public:
     std::string getDescription() const;
 
     /**
+     * @brief Gets the x-coordinate of the room.
+     * @return The x-coordinate.
+     */
+    int getX() const;
+
+    /**
+     * @brief Gets the y-coordinate of the room.
+     * @return The y-coordinate.
+     */
+    int getY() const;
+
+    /**
+     * @brief Gets the z-coordinate of the room.
+     * @return The z-coordinate.
+     */
+    int getZ() const;
+
+    /**
      * @brief Prints the available exits from this room to the console.
      */
     void printExits() const;
@@ -50,6 +71,7 @@ public:
 private:
     std::string description;
     std::map<std::string, Room*> exits;
+    int x, y, z; // 3D coordinates of the room
 };
 
 #endif // ROOM_H
