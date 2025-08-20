@@ -61,3 +61,21 @@ INSERT INTO scores (score_id, player_id, session_id, score) VALUES (1004, 3, 102
 -- Scores for session 103 (Chess)
 INSERT INTO scores (score_id, player_id, session_id, score) VALUES (1005, 1, 103, 12); -- Alice wins
 INSERT INTO scores (score_id, player_id, session_id, score) VALUES (1006, 3, 103, 8);  -- Charlie loses
+
+--
+-- Assumed Schema for Rooms
+--
+-- Collection: rooms
+-- Description: Stores information about each room in the game world.
+-- Fields:
+--   - room_id (NUMBER, PRIMARY KEY)
+--   - description (STRING)
+--   - ascii_art (STRING)
+--
+
+--
+-- Insert data into the 'rooms' collection
+--
+INSERT INTO rooms (room_id, description, ascii_art) VALUES (1, 'You find yourself in a vast, circular library, its towering shelves carved from a single, colossal petrified tree. The air hums with a faint, magical resonance, and the only light filters down from glowing crystals embedded in the ceiling, illuminating a massive, rune-etched obsidian desk at the room''s heart.', '   _______\n  /      /,\n /      //\n/______//\n(______(/');
+INSERT INTO rooms (room_id, description, ascii_art) VALUES (2, 'The air is thick with the scent of ancient paper and preservation wards. You are in the archives, a labyrinth of impossibly tall shelves that disappear into the gloom above. Each shelf is crammed with scrolls, codices, and leather-bound tomes, their spines either blank or marked with cryptic symbols that seem to shift when you''re not looking directly at them.', '||||||||\n|      |\n|      |\n||||||||');
+INSERT INTO rooms (room_id, description, ascii_art) VALUES (3, 'Tucked away behind a tapestry depicting a forgotten battle, you discover a hidden nook. A plush, high-backed armchair sits before a fireplace where the flames burn a soothing, ethereal blue. A small, floating orb of light provides perfect illumination for reading, and the gentle crackling of the fire is the only sound.', '  )  (\n /`--`\\\n|      |\n|______|');
