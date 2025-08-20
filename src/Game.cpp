@@ -10,16 +10,45 @@
 #include <memory>
 #include <algorithm> // Required for std::transform
 #include <cctype>    // Required for ::tolower
+#include <conio.h>   // Required for _getch() and _kbhit() on Windows
+#include <windows.h> // Required for Windows console API
 
-Game::Game() : player(nullptr), gameOver(false) {
+Game::Game() : player(nullptr), gameOver(false), hConsole(GetStdHandle(STD_OUTPUT_HANDLE)) {
     createWorld("sql/game_data.sql"); // This will be ignored now, but keeping for compatibility
 }
 
-Game::Game(const std::string& sql_file_path) : player(nullptr), gameOver(false) {
+Game::Game(const std::string& sql_file_path) : player(nullptr), gameOver(false), hConsole(GetStdHandle(STD_OUTPUT_HANDLE)) {
     createWorld(sql_file_path); // This will be ignored now, but keeping for compatibility
 }
 
 // Destructor is now defaulted in Game.h due to unique_ptr usage
+
+// Helper function to set cursor position
+void SetCursorPosition(int x, int y) {
+    COORD coord;
+    coord.X = x;
+    coord.Y = y;
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+}
+
+// Helper function to clear a specific region of the console
+void ClearConsoleRegion(int x, int y, int width, int height) {
+    DWORD count;
+    COORD coord = { (SHORT)x, (SHORT)y };
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    GetConsoleScreenBufferInfo(hConsole, &csbi);
+
+    // Fill the region with spaces
+    FillConsoleOutputCharacter(hConsole, (TCHAR) ' ', width * height, coord, &count);
+
+    // Fill the region with the current background color
+    FillConsoleOutputAttribute(hConsole, csbi.wAttributes, width * height, coord, &count);
+
+    // Set the cursor to the top-left of the region
+    SetConsoleCursorPosition(hConsole, coord);
+}
 
 void Game::createWorld(const std::string& sql_file_path) {
     // Load all game data from the CSV files
@@ -227,18 +256,54 @@ void Game::printSidePanel() {
 }
 
 void Game::gameLoop() {
-    std::string input;
     while (!gameOver) {
-        printSidePanel(); // Display side panel at the beginning of each loop
-        std::cout << "> ";
-        std::getline(std::cin, input);
-
-        if (input == "quit") {
+        if (g_signal_received) { // Check for signal
             gameOver = true;
             continue;
         }
+        printSidePanel(); // Display side panel at the beginning of each loop
+        std::cout << "> ";
 
-        processInput(input);
+        int ch = _getch(); // Read a single character
+
+        // Handle extended keys (like arrow keys)
+        if (ch == 0 || ch == 0xE0) {
+            ch = _getch(); // Read the second byte for extended key
+            switch (ch) {
+                case 72: // Up arrow
+                    processInput("north");
+                    break;
+                case 80: // Down arrow
+                    processInput("south");
+                    break;
+                case 75: // Left arrow
+                    processInput("west");
+                    break;
+                case 77: // Right arrow
+                    processInput("east");
+                    break;
+                default:
+                    // Ignore other extended keys
+                    break;
+            }
+        } else {
+            // Handle regular characters
+            std::string input_str(1, static_cast<char>(ch)); // Convert char to string
+            if (input_str == "q") { // 'q' for quit
+                gameOver = true;
+                continue;
+            } else if (input_str == "h") { // 'h' for help
+                processInput("help");
+            } else if (input_str == "l") { // 'l' for look
+                processInput("look");
+            } else if (input_str == "d") { // 'd' for dance
+                processInput("dance");
+            } else {
+                // For other single character inputs, pass them to processInput
+                // This allows for future single-character commands
+                processInput(input_str);
+            }
+        }
     }
     std::cout << "Thank you for playing Quanta_Pie!" << std::endl;
 }

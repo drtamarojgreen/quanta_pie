@@ -11,6 +11,8 @@
 #include "Score.h"
 #include "Character.h" // Include full definition of Character
 
+extern volatile sig_atomic_t g_signal_received; // Declare global signal flag
+
 /**
  * @class Game
  * @brief Manages the main game loop, world creation, and player interaction.
@@ -48,8 +50,9 @@ private:
     void printWelcomeMessage();
     void printHelp();
     void loadDataFromCSV();
-    void printCurrentRoomInfo();
-    void printSidePanel(); // New function for side panel display
+    std::vector<std::string> getRoomInfoLines(); // Modified to return lines
+    std::vector<std::string> getSidePanelLines(); // Modified to return lines
+    void displayGameScreen(); // New function to display combined screen
 
     std::unique_ptr<Player> player; // The main player character
     std::vector<std::unique_ptr<Room>> allRooms;
@@ -58,6 +61,7 @@ private:
     std::vector<std::unique_ptr<Score>> allScores;
     std::vector<std::unique_ptr<Character>> allCharacters;
     bool gameOver;
+    HANDLE hConsole; // Console handle for advanced console manipulation
 };
 
 #endif // GAME_H
