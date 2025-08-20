@@ -1,27 +1,25 @@
 #include "Game.h"
 #include "Player.h"
-#include "Map.h"
+#include "Room.h"
+#include "Character.h"
 #include <iostream>
-#include <vector>
-#include <cmath> // For std::cos, std::sin
 
-// Game class members definitions for screen dimensions
-const int Game::screenWidth;
-const int Game::screenHeight;
-
-Game::Game() : player(nullptr), map(nullptr), gameOver(false), score(0) {
+Game::Game() : player(nullptr), gameOver(false) {
     createWorld();
+    // The player will be initialized in createWorld
 }
 
 Game::~Game() {
     delete player;
-    delete map;
+    for (auto room : allRooms) {
+        delete room;
+    }
+    for (auto character : allCharacters) {
+        delete character;
+    }
 }
 
 void Game::createWorld() {
-    map = new Map();
-    // Place player in a valid starting position
-    player = new Player(3.5, 3.5);
     // Load room data from the SQL file
     loadDataFromSQL("sql/game_data.sql");
 
@@ -75,193 +73,133 @@ void Game::loadDataFromSQL(const std::string& filename) {
             std::string description = line.substr(firstQuote + 1, secondQuote - firstQuote - 1);
 
             // The Room class currently only supports a description.
-            // The ascii_art is parsed but not used, to adhere to the protocol
-            // of not modifying unrelated files (like Room.h).
             Room* newRoom = new Room(description);
             allRooms.push_back(newRoom);
+        } else if (line.find("INSERT INTO characters") != std::string::npos) {
+            // This parser is also very fragile and assumes the exact format from sql/game_data.sql
+            // INSERT INTO characters (..., name, description, initial_room_id, dialogue) VALUES (..., 'name', 'desc', room_id, 'dialogue');
+
+            size_t firstQuote = line.find('\'');
+            if (firstQuote == std::string::npos) continue;
+            size_t secondQuote = line.find('\'', firstQuote + 1);
+            if (secondQuote == std::string::npos) continue;
+            std::string name = line.substr(firstQuote + 1, secondQuote - firstQuote - 1);
+
+            size_t thirdQuote = line.find('\'', secondQuote + 1);
+            if (thirdQuote == std::string::npos) continue;
+            size_t fourthQuote = line.find('\'', thirdQuote + 1);
+            if (fourthQuote == std::string::npos) continue;
+            std::string description = line.substr(thirdQuote + 1, fourthQuote - thirdQuote - 1);
+
+            size_t commaAfterDesc = line.find(',', fourthQuote + 1);
+            if (commaAfterDesc == std::string::npos) continue;
+            size_t commaAfterRoomId = line.find(',', commaAfterDesc + 1);
+            if (commaAfterRoomId == std::string::npos) continue;
+
+            // Trim whitespace from the beginning of the string
+            size_t firstDigit = line.find_first_of("0123456789", commaAfterDesc);
+            if (firstDigit == std::string::npos) continue;
+
+            std::string roomIdStr = line.substr(firstDigit, commaAfterRoomId - firstDigit);
+            int roomId = std::stoi(roomIdStr);
+
+            size_t fifthQuote = line.find('\'', commaAfterRoomId + 1);
+            if (fifthQuote == std::string::npos) continue;
+            size_t sixthQuote = line.find('\'', fifthQuote + 1);
+            if (sixthQuote == std::string::npos) continue;
+            std::string dialogue = line.substr(fifthQuote + 1, sixthQuote - fifthQuote - 1);
+
+            Character* newCharacter = new Character(name, description, dialogue);
+            allCharacters.push_back(newCharacter);
+
+            if (roomId > 0 && roomId <= allRooms.size()) {
+                allRooms[roomId - 1]->addCharacter(newCharacter);
+            }
         }
     }
 }
 
 void Game::start() {
     printWelcomeMessage();
-    render(); // Initial render
     gameLoop();
 }
 
+void Game::printCurrentRoomInfo() {
+    if (!player) return;
+
+    Room* currentRoom = player->getCurrentRoom();
+    std::cout << std::endl;
+    std::cout << currentRoom->getDescription() << std::endl;
+
+    const auto& characters = currentRoom->getCharacters();
+    if (!characters.empty()) {
+        std::cout << std::endl;
+        for (const auto& character : characters) {
+            std::cout << character->getDescription() << std::endl;
+            std::cout << "They say: \"" << character->getDialogue() << "\"" << std::endl;
+        }
+    }
+
+    std::cout << std::endl << "It's you!" << std::endl;
+    std::cout << player->getRepresentation() << std::endl << std::endl;
+    currentRoom->printExits();
+}
+
 void Game::printWelcomeMessage() {
-    std::cout << "Welcome to the Raycaster Game!" << std::endl;
+    std::cout << "Welcome to Quanta_Pie!" << std::endl;
     std::cout << "----------------------------------------" << std::endl;
+    printCurrentRoomInfo();
+    printHelp();
+}
+
+void Game::printHelp() {
+    std::cout << std::endl;
+    std::cout << "--- Game Commands ---" << std::endl;
+    std::cout << "  - [direction]: Type 'north', 'south', 'east', or 'west' to move." << std::endl;
+    std::cout << "  - 'look':         Look around the room again." << std::endl;
+    std::cout << "  - 'dance':        Do a little dance." << std::endl;
+    std::cout << "  - 'help':         Show this list of commands." << std::endl;
+    std::cout << "  - 'quit':         Exit the game." << std::endl;
+    std::cout << "---------------------" << std::endl;
+    std::cout << std::endl;
 }
 
 void Game::gameLoop() {
-    char input = ' ';
-    const double moveSpeed = 0.2;
-    const double rotSpeed = 0.1;
-    bool hasMoved = false;
-
+    std::string input;
     while (!gameOver) {
-        std::cin >> input;
-        hasMoved = false;
+        std::cout << "> ";
+        std::getline(std::cin, input);
 
-        if (input == 'q') {
+        if (input == "quit") {
             gameOver = true;
             continue;
         }
 
-        // --- Movement ---
-        if (input == 'w') {
-            double newX = player->x + player->dirX * moveSpeed;
-            double newY = player->y + player->dirY * moveSpeed;
-            if (map->getTile(int(newX), int(player->y)) != '#') player->x = newX;
-            if (map->getTile(int(player->x), int(newY)) != '#') player->y = newY;
-            hasMoved = true;
-        }
-        if (input == 's') {
-            double newX = player->x - player->dirX * moveSpeed;
-            double newY = player->y - player->dirY * moveSpeed;
-            if (map->getTile(int(newX), int(player->y)) != '#') player->x = newX;
-            if (map->getTile(int(player->x), int(newY)) != '#') player->y = newY;
-            hasMoved = true;
-        }
-
-        // --- Rotation ---
-        if (input == 'd') { // Turn right
-            double oldDirX = player->dirX;
-            player->dirX = player->dirX * cos(-rotSpeed) - player->dirY * sin(-rotSpeed);
-            player->dirY = oldDirX * sin(-rotSpeed) + player->dirY * cos(-rotSpeed);
-            double oldPlaneX = player->planeX;
-            player->planeX = player->planeX * cos(-rotSpeed) - player->planeY * sin(-rotSpeed);
-            player->planeY = oldPlaneX * sin(-rotSpeed) + player->planeY * cos(-rotSpeed);
-            hasMoved = true;
-        }
-        if (input == 'a') { // Turn left
-            double oldDirX = player->dirX;
-            player->dirX = player->dirX * cos(rotSpeed) - player->dirY * sin(rotSpeed);
-            player->dirY = oldDirX * sin(rotSpeed) + player->dirY * cos(rotSpeed);
-            double oldPlaneX = player->planeX;
-            player->planeX = player->planeX * cos(rotSpeed) - player->planeY * sin(rotSpeed);
-            player->planeY = oldPlaneX * sin(rotSpeed) + player->planeY * cos(rotSpeed);
-            hasMoved = true;
-        }
-
-        if (hasMoved) {
-            score++; // Increment score on any valid move/turn
-            render();
-        }
+        processInput(input);
     }
-    std::cout << "Game Over! Final Score: " << score << std::endl;
+    std::cout << "Thank you for playing Quanta_Pie!" << std::endl;
 }
 
-void Game::render() {
-    // Clear console
-    #ifdef _WIN32
-        system("cls");
-    #else
-        system("clear");
-    #endif
+void Game::processInput(const std::string& input) {
+    if (!player) return;
 
-    std::vector<std::string> screen(screenHeight, std::string(screenWidth, ' '));
-    const int panelWidth = 20;
-    const int gameWidth = screenWidth - panelWidth;
-
-    // --- Raycasting ---
-    for (int x = 0; x < gameWidth; ++x) {
-        double cameraX = 2 * x / double(gameWidth) - 1; // Recalculate cameraX for game view width
-        double rayDirX = player->dirX + player->planeX * cameraX;
-        double rayDirY = player->dirY + player->planeY * cameraX;
-
-        int mapX = int(player->x);
-        int mapY = int(player->y);
-
-        double deltaDistX = (rayDirX == 0) ? 1e30 : std::abs(1 / rayDirX);
-        double deltaDistY = (rayDirY == 0) ? 1e30 : std::abs(1 / rayDirY);
-
-        double sideDistX, sideDistY;
-        int stepX, stepY;
-
-        if (rayDirX < 0) {
-            stepX = -1;
-            sideDistX = (player->x - mapX) * deltaDistX;
-        } else {
-            stepX = 1;
-            sideDistX = (mapX + 1.0 - player->x) * deltaDistX;
-        }
-        if (rayDirY < 0) {
-            stepY = -1;
-            sideDistY = (player->y - mapY) * deltaDistY;
-        } else {
-            stepY = 1;
-            sideDistY = (mapY + 1.0 - player->y) * deltaDistY;
-        }
-
-        int hit = 0;
-        int side;
-        while (hit == 0) {
-            if (sideDistX < sideDistY) {
-                sideDistX += deltaDistX;
-                mapX += stepX;
-                side = 0;
-            } else {
-                sideDistY += deltaDistY;
-                mapY += stepY;
-                side = 1;
-            }
-            if (map->getTile(mapX, mapY) == '#') hit = 1;
-        }
-
-        double perpWallDist;
-        if (side == 0) perpWallDist = (sideDistX - deltaDistX);
-        else          perpWallDist = (sideDistY - deltaDistY);
-
-        int lineHeight = (int)(screenHeight / perpWallDist);
-
-        int drawStart = -lineHeight / 2 + screenHeight / 2;
-        if (drawStart < 0) drawStart = 0;
-        int drawEnd = lineHeight / 2 + screenHeight / 2;
-        if (drawEnd >= screenHeight) drawEnd = screenHeight - 1;
-
-        char wallChar;
-        if (perpWallDist < 4) wallChar = '#';
-        else if (perpWallDist < 8) wallChar = 'O';
-        else if (perpWallDist < 14) wallChar = '=';
-        else wallChar = '-';
-
-        if (side == 1) {
-            if (wallChar == '#') wallChar = '@';
-            else if (wallChar == 'O') wallChar = 'o';
-            else if (wallChar == '=') wallChar = '~';
-        }
-
-        for (int y = drawStart; y <= drawEnd; ++y) {
-            screen[y][x] = wallChar;
-        }
-
-        for (int y = drawEnd + 1; y < screenHeight; ++y) {
-            screen[y][x] = '.';
-        }
+    if (input == "help") {
+        printHelp();
+    } else if (input == "look") {
+        printCurrentRoomInfo();
+    } else if (input == "dance") {
+        std::cout << "You do a little jig. It's surprisingly uplifting." << std::endl;
     }
+    else {
+        // Try to move
+        Room* current = player->getCurrentRoom();
+        Room* nextRoom = current->getExit(input);
 
-    // --- UI Side Panel ---
-    int panelX = gameWidth + 2; // Starting X coordinate for panel text
-
-    // Draw Score
-    std::string scoreHeader = "SCORE";
-    screen[1].replace(panelX, scoreHeader.length(), scoreHeader);
-    std::string scoreValue = std::to_string(score);
-    screen[2].replace(panelX, scoreValue.length(), scoreValue);
-
-    // Draw Controls
-    std::string controlsHeader = "CONTROLS";
-    screen[4].replace(panelX, controlsHeader.length(), controlsHeader);
-    screen[5].replace(panelX, 12, "W: Forward");
-    screen[6].replace(panelX, 13, "S: Backward");
-    screen[7].replace(panelX, 13, "A: Turn Left");
-    screen[8].replace(panelX, 14, "D: Turn Right");
-    screen[9].replace(panelX, 8, "Q: Quit");
-
-    // --- Print Screen Buffer ---
-    for (int y = 0; y < screenHeight; ++y) {
-        std::cout << screen[y] << std::endl;
+        if (nextRoom != nullptr) {
+            player->setCurrentRoom(nextRoom);
+            printCurrentRoomInfo();
+        } else {
+            std::cout << "You can't go that way. Type 'help' for a list of commands." << std::endl;
+        }
     }
 }
