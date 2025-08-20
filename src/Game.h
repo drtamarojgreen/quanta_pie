@@ -38,6 +38,7 @@ private:
     void gameLoop();
     void processInput(const std::string& input);
     void printWelcomeMessage();
+    void printHelp();
 
     Player* player;
     std::vector<Room*> allRooms;
