@@ -59,6 +59,25 @@ Built entirely in **modern C++17**, Quanta_Pie is designed to be:
 
 ---
 
+## 🧪 Running Tests
+
+A suite of unit and BDD-style tests is included in the `tests/` directory. To build and run the tests, you will need a C++ compiler that supports C++17.
+
+1.  **Compile the test suite:**
+    The following command uses `g++` to compile all test files and the necessary source files from the `src/` directory.
+
+    ```bash
+    g++ -std=c++17 -I./src -o test_runner tests/*.cpp src/*.cpp src/objects/*.cpp src/players/*.cpp
+    ```
+    *Note: In accordance with project directives, this command has not been tested but is expected to work based on the project structure.*
+
+2.  **Run the tests:**
+    ```bash
+    ./test_runner
+    ```
+
+---
+
 ## 🤝 Contributing
 
 Contributions are welcome! If you have ideas for new story branches, features, or improvements, feel free to open an issue or submit a pull request.
