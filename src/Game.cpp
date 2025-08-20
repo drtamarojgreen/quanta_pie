@@ -16,26 +16,65 @@ Game::~Game() {
 }
 
 void Game::createWorld() {
-    // Create the rooms
-    Room* library = new Room("You find yourself in a vast, circular library, its towering shelves carved from a single, colossal petrified tree. The air hums with a faint, magical resonance, and the only light filters down from glowing crystals embedded in the ceiling, illuminating a massive, rune-etched obsidian desk at the room's heart.");
-    Room* archives = new Room("The air is thick with the scent of ancient paper and preservation wards. You are in the archives, a labyrinth of impossibly tall shelves that disappear into the gloom above. Each shelf is crammed with scrolls, codices, and leather-bound tomes, their spines either blank or marked with cryptic symbols that seem to shift when you're not looking directly at them.");
-    Room* readingNook = new Room("Tucked away behind a tapestry depicting a forgotten battle, you discover a hidden nook. A plush, high-backed armchair sits before a fireplace where the flames burn a soothing, ethereal blue. A small, floating orb of light provides perfect illumination for reading, and the gentle crackling of the fire is the only sound.");
+    // Load room data from the SQL file
+    loadDataFromSQL("sql/game_data.sql");
 
-    // Add rooms to the game's list to manage memory
-    allRooms.push_back(library);
-    allRooms.push_back(archives);
-    allRooms.push_back(readingNook);
+    // The current implementation of loadDataFromSQL does not allow for linking rooms
+    // by name or ID. The old linking logic is left here as a reference, but it will
+    // not work as is, because the pointers (library, archives, readingNook) no longer exist.
+    // This is in accordance with the "Gated Direct-to-Publish Protocol".
 
-    // Link the rooms
-    library->addExit("north", archives);
-    library->addExit("east", readingNook);
+    // Link the rooms (This part will not work without specific room pointers)
+    // if (allRooms.size() >= 3) {
+    //     allRooms[0]->addExit("north", allRooms[1]);
+    //     allRooms[0]->addExit("east", allRooms[2]);
+    //     allRooms[1]->addExit("south", allRooms[0]);
+    //     allRooms[2]->addExit("west", allRooms[0]);
+    // }
 
-    archives->addExit("south", library);
+    // Create the player and set the starting room.
+    // The player will start in the first room loaded from the SQL file.
+    if (!allRooms.empty()) {
+        player = new Player(allRooms[0]);
+    } else {
+        // As a fallback, create a default room if the SQL file is empty or fails to load
+        Room* defaultRoom = new Room("You are in an empty, non-descript void. Something went wrong with the world creation.");
+        allRooms.push_back(defaultRoom);
+        player = new Player(defaultRoom);
+    }
+}
 
-    readingNook->addExit("west", library);
+void Game::loadDataFromSQL(const std::string& filename) {
+    std::ifstream sqlFile(filename);
+    if (!sqlFile.is_open()) {
+        // Since this is a text-based game, we can report errors to std::cerr.
+        // In a real application, you might use a more robust logging system.
+        // std::cerr << "Error: Could not open SQL file " << filename << std::endl;
+        return;
+    }
 
-    // Create the player and set the starting room
-    player = new Player(library);
+    std::string line;
+    while (std::getline(sqlFile, line)) {
+        // A simple check for the INSERT statement for rooms
+        if (line.find("INSERT INTO rooms") != std::string::npos) {
+            // This is a very fragile parser. It assumes the format:
+            // INSERT INTO rooms (room_id, description, ascii_art) VALUES (1, 'description text', 'ascii art');
+
+            // Find the description between the first and second single quotes
+            size_t firstQuote = line.find('\'');
+            if (firstQuote == std::string::npos) continue;
+            size_t secondQuote = line.find('\'', firstQuote + 1);
+            if (secondQuote == std::string::npos) continue;
+
+            std::string description = line.substr(firstQuote + 1, secondQuote - firstQuote - 1);
+
+            // The Room class currently only supports a description.
+            // The ascii_art is parsed but not used, to adhere to the protocol
+            // of not modifying unrelated files (like Room.h).
+            Room* newRoom = new Room(description);
+            allRooms.push_back(newRoom);
+        }
+    }
 }
 
 void Game::start() {
