@@ -6,6 +6,7 @@ Player::Player(Room* startingRoom) : currentRoom(startingRoom) {
     // Inventory is default-initialized to empty
 }
 
+
 void Player::setCurrentRoom(Room* room) {
     currentRoom = room;
 }

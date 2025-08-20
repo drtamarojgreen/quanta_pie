@@ -17,9 +17,9 @@ Game::~Game() {
 
 void Game::createWorld() {
     // Create the rooms
-    Room* library = new Room("You are in a dimly lit library. A grand oak desk sits in the center.");
-    Room* archives = new Room("You are in a dusty archive room. Shelves packed with old scrolls line the walls.");
-    Room* readingNook = new Room("You've entered a cozy reading nook with a crackling fireplace.");
+    Room* library = new Room("You find yourself in a vast, circular library, its towering shelves carved from a single, colossal petrified tree. The air hums with a faint, magical resonance, and the only light filters down from glowing crystals embedded in the ceiling, illuminating a massive, rune-etched obsidian desk at the room's heart.");
+    Room* archives = new Room("The air is thick with the scent of ancient paper and preservation wards. You are in the archives, a labyrinth of impossibly tall shelves that disappear into the gloom above. Each shelf is crammed with scrolls, codices, and leather-bound tomes, their spines either blank or marked with cryptic symbols that seem to shift when you're not looking directly at them.");
+    Room* readingNook = new Room("Tucked away behind a tapestry depicting a forgotten battle, you discover a hidden nook. A plush, high-backed armchair sits before a fireplace where the flames burn a soothing, ethereal blue. A small, floating orb of light provides perfect illumination for reading, and the gentle crackling of the fire is the only sound.");
 
     // Add rooms to the game's list to manage memory
     allRooms.push_back(library);
