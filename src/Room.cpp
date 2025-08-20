@@ -1,4 +1,5 @@
 #include "Room.h"
+#include "Character.h"
 #include <iostream>
 
 Room::Room(const std::string& description) : description(description) {}
@@ -16,6 +17,14 @@ Room* Room::getExit(const std::string& direction) {
 
 std::string Room::getDescription() const {
     return description;
+}
+
+void Room::addCharacter(Character* character) {
+    characters.push_back(character);
+}
+
+const std::vector<Character*>& Room::getCharacters() const {
+    return characters;
 }
 
 void Room::printExits() const {

@@ -3,9 +3,11 @@
 
 #include <string>
 #include <map>
+#include <vector>
 
-// Forward declaration to resolve circular dependency with Player
+// Forward declarations
 class Player;
+class Character;
 
 /**
  * @class Room
@@ -47,9 +49,22 @@ public:
      */
     void printExits() const;
 
+    /**
+     * @brief Adds a character to the room.
+     * @param character A pointer to the Character to add to the room.
+     */
+    void addCharacter(Character* character);
+
+    /**
+     * @brief Gets the characters in the room.
+     * @return A constant reference to the vector of characters in the room.
+     */
+    const std::vector<Character*>& getCharacters() const;
+
 private:
     std::string description;
     std::map<std::string, Room*> exits;
+    std::vector<Character*> characters;
 };
 
 #endif // ROOM_H
