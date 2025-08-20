@@ -1,6 +1,6 @@
 #include "Room.h"
-#include "Character.h"
-#include "Challenge.h" // Include Challenge.h
+#include "objects/Character.h"
+#include "objects/Challenge.h" // Include Challenge.h
 #include <iostream>
 
 Room::Room(const std::string& description) : description(description) {}

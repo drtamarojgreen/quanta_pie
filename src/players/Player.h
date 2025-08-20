@@ -3,7 +3,7 @@
 
 #include <string>
 
-class Room;
+class Room; // Forward declaration for Room
 
 class Player {
 public:

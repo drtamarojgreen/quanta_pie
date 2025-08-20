@@ -1,7 +1,7 @@
 #include "Game.h"
-#include "Player.h"
+#include "players/Player.h"
 #include "Room.h"
-#include "Character.h"
+#include "objects/Character.h"
 #include "CSVParser.h"
 #include <iostream>
 #include <string>
@@ -13,11 +13,11 @@
 #include <conio.h>   // Required for _getch() and _kbhit() on Windows
 #include <windows.h> // Required for Windows console API
 
-Game::Game() : player(nullptr), gameOver(false), hConsole(GetStdHandle(STD_OUTPUT_HANDLE)) {
+Game::Game() : player(nullptr), gameOver(false), hConsole(GetStdHandle(STD_OUTPUT_HANDLE)), current_challenge(nullptr) {
     createWorld("sql/game_data.sql"); // This will be ignored now, but keeping for compatibility
 }
 
-Game::Game(const std::string& sql_file_path) : player(nullptr), gameOver(false), hConsole(GetStdHandle(STD_OUTPUT_HANDLE)) {
+Game::Game(const std::string& sql_file_path) : player(nullptr), gameOver(false), hConsole(GetStdHandle(STD_OUTPUT_HANDLE)), current_challenge(nullptr) {
     createWorld(sql_file_path); // This will be ignored now, but keeping for compatibility
 }
 
@@ -60,6 +60,21 @@ void Game::createWorld(const std::string& sql_file_path) {
         // Assign the first loaded room as the starting location for the main player.
         if (!allRooms.empty()) {
             player->setCurrentRoom(allRooms[0].get()); // Pass raw pointer to Room
+            // Example: Add a challenge to the starting room
+            if (allRooms[0]->getChallenge() == nullptr) {
+                std::vector<CBTChoice> choices;
+                choices.push_back({"Challenge the thought", [this](Game& game){
+                    game.player->incrementScore(10);
+                    game.current_challenge = nullptr; // Resolve challenge
+                    // Add more complex outcomes here
+                }});
+                choices.push_back({"Accept the thought", [this](Game& game){
+                    game.player->incrementScore(-5);
+                    game.current_challenge = nullptr; // Resolve challenge
+                    // Add more complex outcomes here
+                }});
+                allRooms[0]->setChallenge(std::make_unique<Challenge>("You feel overwhelmed by the vastness of the void.", choices));
+            }
         }
     } else {
         // Fallback: if no players or rooms are loaded, create defaults.
@@ -168,30 +183,43 @@ std::vector<std::string> Game::getRoomInfoLines() {
     std::vector<std::string> lines;
     if (!player) return lines;
 
-    Room* currentRoom = player->getCurrentRoom();
-    lines.push_back(""); // Empty line for spacing
-    lines.push_back(currentRoom->getDescription());
-
-    const auto& characters = currentRoom->getCharacters();
-    if (!characters.empty()) {
-        lines.push_back(""); // Empty line for spacing
-        for (const auto& character : characters) {
-            lines.push_back(character->getDescription());
-            lines.push_back("They say: \"" + character->getDialogue() + "\"");
+    if (current_challenge) {
+        lines.push_back("----------------------------------------");
+        lines.push_back("               CHALLENGE!               ");
+        lines.push_back("----------------------------------------");
+        lines.push_back("Thought: " + current_challenge->getThought());
+        lines.push_back("");
+        lines.push_back("Choices:");
+        for (size_t i = 0; i < current_challenge->getChoices().size(); ++i) {
+            lines.push_back(std::to_string(i + 1) + ". " + current_challenge->getChoices()[i].description);
         }
-    }
+        lines.push_back("----------------------------------------");
+    } else {
+        Room* currentRoom = player->getCurrentRoom();
+        lines.push_back(""); // Empty line for spacing
+        lines.push_back(currentRoom->getDescription());
 
-    lines.push_back(""); // Empty line for spacing
-    lines.push_back("It's you!");
-    lines.push_back(player->getRepresentation());
-    lines.push_back(""); // Empty line for spacing
+        const auto& characters = currentRoom->getCharacters();
+        if (!characters.empty()) {
+            lines.push_back(""); // Empty line for spacing
+            for (const auto& character : characters) {
+                lines.push_back(character->getDescription());
+                lines.push_back("They say: \"" + character->getDialogue() + "\"");
+            }
+        }
 
-    std::stringstream ss_exits;
-    ss_exits << "Available exits:";
-    for (auto const& [direction, room] : currentRoom->getAllExits()) { // Use getAllExits
-        ss_exits << " " << direction;
+        lines.push_back(""); // Empty line for spacing
+        lines.push_back("It's you!");
+        lines.push_back(player->getRepresentation());
+        lines.push_back(""); // Empty line for spacing
+
+        std::stringstream ss_exits;
+        ss_exits << "Available exits:";
+        for (auto const& [direction, room] : currentRoom->getAllExits()) { // Use getAllExits
+            ss_exits << " " << direction;
+        }
+        lines.push_back(ss_exits.str());
     }
-    lines.push_back(ss_exits.str());
     return lines;
 }
 
@@ -310,7 +338,25 @@ void Game::gameLoop() {
             if (input_str == "q") { // 'q' for quit
                 gameOver = true;
                 continue;
-            } else if (input_str == "h") { // 'h' for help
+            }
+            // If a challenge is active, process input as a choice number
+            else if (current_challenge) {
+                int choice_num = -1;
+                try {
+                    choice_num = std::stoi(input_str);
+                } catch (const std::invalid_argument& e) {
+                    // Not a number, ignore or provide feedback
+                } catch (const std::out_of_range& e) {
+                    // Number too large/small, ignore or provide feedback
+                }
+
+                if (choice_num > 0 && choice_num <= current_challenge->getChoices().size()) {
+                    current_challenge->getChoices()[choice_num - 1].action(); // Execute the chosen action
+                } else {
+                    // Invalid choice for challenge, ignore or provide feedback
+                }
+            }
+            else if (input_str == "h") { // 'h' for help
                 processInput("help");
             } else if (input_str == "l") { // 'l' for look
                 processInput("look");
@@ -333,6 +379,14 @@ void Game::processInput(const std::string& input) {
     // Convert input to lowercase for case-insensitive comparison
     std::transform(lowerInput.begin(), lowerInput.end(), lowerInput.begin(), ::tolower);
 
+    // If a challenge is active, process input as a choice number
+    if (current_challenge) {
+        // This part is now handled in gameLoop directly for single-key input
+        // This function will only be called by gameLoop for mapped commands (north, south, etc.)
+        return;
+    }
+
+    // Process normal game commands
     if (lowerInput == "help") {
         // Help is now part of the side panel, no separate print needed here
         // Or, if a specific help message is desired, it should be handled differently
@@ -353,12 +407,15 @@ void Game::processInput(const std::string& input) {
     else {
         // Try to move
         Room* current = player->getCurrentRoom();
-        Room* nextRoom = current->getExit(lowerInput); // Use lowerInput for direction
+        Room* nextRoom = current->getExit(lowerInput);
 
         if (nextRoom != nullptr) {
             player->setCurrentRoom(nextRoom);
             player->incrementScore(); // Increment score on successful move
-            // No printCurrentRoomInfo() here, displayGameScreen() handles it
+            // Check for challenge in the new room
+            if (nextRoom->getChallenge() != nullptr) {
+                current_challenge = std::make_unique<Challenge>(nextRoom->getChallenge()->getThought(), nextRoom->getChallenge()->getChoices());
+            }
         } else {
             // This message will be overwritten by the next displayGameScreen() call
             // Consider a temporary message area or a more robust message system

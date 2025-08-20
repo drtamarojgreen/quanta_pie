@@ -6,7 +6,7 @@
 #include <functional>
 
 // Forward declaration of Game class to avoid circular dependencies
-class Game;
+// #include "../Game.h" // Removed to break circular dependency
 
 /**
  * @struct CBTChoice
@@ -14,7 +14,7 @@ class Game;
  */
 struct CBTChoice {
     std::string description; // Text displayed for the choice
-    std::function<void(Game&)> action; // Action to perform if this choice is selected
+    std::function<void()> action; // Action to perform if this choice is selected (no Game& argument)
 };
 
 /**

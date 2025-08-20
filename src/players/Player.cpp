@@ -1,5 +1,5 @@
 #include "Player.h"
-#include "Room.h"
+#include "../Room.h"
 
 Player::Player(int id, const std::string& name, const std::string& joinDate, Room* startingRoom)
     : id(id), name(name), joinDate(joinDate), currentRoom(startingRoom), score(0) {}
