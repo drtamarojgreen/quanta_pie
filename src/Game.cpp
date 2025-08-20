@@ -84,6 +84,13 @@ void Game::processInput(const std::string& input) {
         std::cout << std::endl << "It's you!" << std::endl;
         std::cout << player->getRepresentation() << std::endl << std::endl;
         player->getCurrentRoom()->printExits();
+    } else if (input == "look") {
+        std::cout << std::endl;
+        std::cout << player->getCurrentRoom()->getDescription() << std::endl;
+        player->getCurrentRoom()->printExits();
+    } else if (input == "dance") {
+        std::cout << std::endl << "You bust out some sick moves!" << std::endl;
+        std::cout << player->getRepresentation() << std::endl;
     } else {
         std::cout << "You can't go that way." << std::endl;
     }
