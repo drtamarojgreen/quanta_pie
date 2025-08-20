@@ -45,7 +45,6 @@ void Game::start() {
 
 void Game::printWelcomeMessage() {
     std::cout << "Welcome to Quanta_Pie!" << std::endl;
-    std::cout << "Type 'quit' to exit the game." << std::endl;
     std::cout << "----------------------------------------" << std::endl;
     if (player) {
         std::cout << player->getCurrentRoom()->getDescription() << std::endl;
@@ -53,6 +52,19 @@ void Game::printWelcomeMessage() {
         std::cout << player->getRepresentation() << std::endl << std::endl;
         player->getCurrentRoom()->printExits();
     }
+    printHelp();
+}
+
+void Game::printHelp() {
+    std::cout << std::endl;
+    std::cout << "--- Game Commands ---" << std::endl;
+    std::cout << "  - [direction]: Type 'north', 'south', 'east', or 'west' to move." << std::endl;
+    std::cout << "  - 'look':         Look around the room again." << std::endl;
+    std::cout << "  - 'dance':        Do a little dance." << std::endl;
+    std::cout << "  - 'help':         Show this list of commands." << std::endl;
+    std::cout << "  - 'quit':         Exit the game." << std::endl;
+    std::cout << "---------------------" << std::endl;
+    std::cout << std::endl;
 }
 
 void Game::gameLoop() {
@@ -74,17 +86,31 @@ void Game::gameLoop() {
 void Game::processInput(const std::string& input) {
     if (!player) return;
 
-    Room* current = player->getCurrentRoom();
-    Room* nextRoom = current->getExit(input);
-
-    if (nextRoom != nullptr) {
-        player->setCurrentRoom(nextRoom);
+    if (input == "help") {
+        printHelp();
+    } else if (input == "look") {
         std::cout << std::endl;
         std::cout << player->getCurrentRoom()->getDescription() << std::endl;
         std::cout << std::endl << "It's you!" << std::endl;
         std::cout << player->getRepresentation() << std::endl << std::endl;
         player->getCurrentRoom()->printExits();
-    } else {
-        std::cout << "You can't go that way." << std::endl;
+    } else if (input == "dance") {
+        std::cout << "You do a little jig. It's surprisingly uplifting." << std::endl;
+    }
+    else {
+        // Try to move
+        Room* current = player->getCurrentRoom();
+        Room* nextRoom = current->getExit(input);
+
+        if (nextRoom != nullptr) {
+            player->setCurrentRoom(nextRoom);
+            std::cout << std::endl;
+            std::cout << player->getCurrentRoom()->getDescription() << std::endl;
+            std::cout << std::endl << "It's you!" << std::endl;
+            std::cout << player->getRepresentation() << std::endl << std::endl;
+            player->getCurrentRoom()->printExits();
+        } else {
+            std::cout << "You can't go that way. Type 'help' for a list of commands." << std::endl;
+        }
     }
 }
