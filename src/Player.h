@@ -23,18 +23,20 @@ public:
      * @param startingRoom A pointer to the Room where the player will start.
      */
     Player(int id, const std::string& name, const std::string& joinDate, Room* startingRoom);
+=======
+class Player {
+public:
+    // Player's position vector
+    double x;
+    double y;
 
-    /**
-     * @brief Moves the player to a new room.
-     * @param room A pointer to the new current Room.
-     */
-    void setCurrentRoom(Room* room);
+    // Player's direction vector
+    double dirX;
+    double dirY;
 
-    /**
-     * @brief Gets the player's current room.
-     * @return A pointer to the Room the player is currently in.
-     */
-    Room* getCurrentRoom() const;
+    // The camera plane, perpendicular to the direction
+    double planeX;
+    double planeY;
 
     /**
      * @brief Gets the player's ID.
@@ -65,6 +67,11 @@ private:
     std::string name;
     std::string joinDate;
     Room* currentRoom;
+     * @brief Constructs a new Player object.
+     * @param startX The player's starting x-coordinate.
+     * @param startY The player's starting y-coordinate.
+     */
+    Player(double startX, double startY);
 };
 
 #endif // PLAYER_H
