@@ -1,38 +1,38 @@
 -- SQL script for TissDB game data.
 --
 -- This script assumes a schema for a simple game with players, sessions, and scores.
--- Since TissDB does not support DDL statements like CREATE TABLE, this script
--- only contains INSERT statements to populate the collections. The collections
--- are assumed to be created beforehand via the TissDB API.
---
--- Assumed Schema:
---
--- Collection: players
--- Description: Stores information about each player.
--- Fields:
---   - player_id (NUMBER, PRIMARY KEY)
---   - name (STRING)
---   - join_date (DATETIME)
---
--- Collection: game_sessions
--- Description: Stores information about each game session.
--- Fields:
---   - session_id (NUMBER, PRIMARY KEY)
---   - game_type (STRING) - e.g., 'Chess', 'Checkers'
---   - start_time (DATETIME)
---   - end_time (DATETIME)
---
--- Collection: scores
--- Description: Stores the scores for each player in each game session.
--- Fields:
---   - score_id (NUMBER, PRIMARY KEY)
---   - player_id (NUMBER, FOREIGN KEY to players.player_id)
---   - session_id (NUMBER, FOREIGN KEY to game_sessions.session_id)
---   - score (NUMBER)
---
+-- This script defines the schema and initial data for a simple game with
+-- players, sessions, and scores.
 
 -- =============================================================================
--- Insert Sample Data
+-- Schema Definitions
+-- =============================================================================
+
+CREATE TABLE players (
+    player_id INT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    join_date DATETIME
+);
+
+CREATE TABLE game_sessions (
+    session_id INT PRIMARY KEY,
+    game_type VARCHAR(255),
+    start_time DATETIME,
+    end_time DATETIME
+);
+
+CREATE TABLE scores (
+    score_id INT PRIMARY KEY,
+    player_id INT,
+    session_id INT,
+    score INT,
+    FOREIGN KEY (player_id) REFERENCES players(player_id),
+    FOREIGN KEY (session_id) REFERENCES game_sessions(session_id)
+);
+
+
+-- =============================================================================
+-- Sample Data Insertion
 -- =============================================================================
 
 --
@@ -63,19 +63,66 @@ INSERT INTO scores (score_id, player_id, session_id, score) VALUES (1005, 1, 103
 INSERT INTO scores (score_id, player_id, session_id, score) VALUES (1006, 3, 103, 8);  -- Charlie loses
 
 --
--- Assumed Schema for Rooms
+-- Schema and data for Rooms
 --
--- Collection: rooms
--- Description: Stores information about each room in the game world.
--- Fields:
---   - room_id (NUMBER, PRIMARY KEY)
---   - description (STRING)
---   - ascii_art (STRING)
---
+CREATE TABLE rooms (
+    room_id INT PRIMARY KEY,
+    description TEXT,
+    ascii_art TEXT
+);
 
---
--- Insert data into the 'rooms' collection
---
 INSERT INTO rooms (room_id, description, ascii_art) VALUES (1, 'You find yourself in a vast, circular library, its towering shelves carved from a single, colossal petrified tree. The air hums with a faint, magical resonance, and the only light filters down from glowing crystals embedded in the ceiling, illuminating a massive, rune-etched obsidian desk at the room''s heart.', '   _______\n  /      /,\n /      //\n/______//\n(______(/');
 INSERT INTO rooms (room_id, description, ascii_art) VALUES (2, 'The air is thick with the scent of ancient paper and preservation wards. You are in the archives, a labyrinth of impossibly tall shelves that disappear into the gloom above. Each shelf is crammed with scrolls, codices, and leather-bound tomes, their spines either blank or marked with cryptic symbols that seem to shift when you''re not looking directly at them.', '||||||||\n|      |\n|      |\n||||||||');
 INSERT INTO rooms (room_id, description, ascii_art) VALUES (3, 'Tucked away behind a tapestry depicting a forgotten battle, you discover a hidden nook. A plush, high-backed armchair sits before a fireplace where the flames burn a soothing, ethereal blue. A small, floating orb of light provides perfect illumination for reading, and the gentle crackling of the fire is the only sound.', '  )  (\n /`--`\\\n|      |\n|______|');
+
+
+--
+-- Schema and data for Items
+--
+CREATE TABLE items (
+    item_id INT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT
+);
+
+INSERT INTO items (item_id, name, description) VALUES (1, 'Obsidian Key', 'A key carved from a single piece of volcanic glass. It feels cold to the touch.');
+INSERT INTO items (item_id, name, description) VALUES (2, 'Tattered Scroll', 'A fragile scroll covered in faded, unreadable glyphs.');
+
+
+--
+-- Schema and data for Player Inventory
+--
+CREATE TABLE player_inventory (
+    inventory_id INT PRIMARY KEY,
+    player_id INT,
+    item_id INT,
+    quantity INT,
+    FOREIGN KEY (player_id) REFERENCES players(player_id),
+    FOREIGN KEY (item_id) REFERENCES items(item_id)
+);
+
+-- Give Alice the Tattered Scroll
+INSERT INTO player_inventory (inventory_id, player_id, item_id, quantity) VALUES (1, 1, 2, 1);
+
+
+--
+-- Schema and data for Nexus Flow (Room Connectivity)
+--
+CREATE TABLE room_exits (
+    exit_id INT PRIMARY KEY,
+    source_room_id INT,
+    destination_room_id INT,
+    direction VARCHAR(255),
+    description TEXT,
+    required_item_id INT,
+    FOREIGN KEY (source_room_id) REFERENCES rooms(room_id),
+    FOREIGN KEY (destination_room_id) REFERENCES rooms(room_id),
+    FOREIGN KEY (required_item_id) REFERENCES items(item_id)
+);
+
+-- An open exit from the Library (1) to the Archives (2)
+INSERT INTO room_exits (exit_id, source_room_id, destination_room_id, direction, description, required_item_id) VALUES (1, 1, 2, 'EAST', 'A grand, marble archway leads to the east.', NULL);
+-- A locked exit from the Library (1) to the Hidden Nook (3)
+INSERT INTO room_exits (exit_id, source_room_id, destination_room_id, direction, description, required_item_id) VALUES (2, 1, 3, 'WEST', 'A heavy, oak door is set into the western wall. It has a large, obsidian lock.', 1);
+-- The return exit from the Archives (2) to the Library (1)
+INSERT INTO room_exits (exit_id, source_room_id, destination_room_id, direction, description, required_item_id) VALUES (3, 2, 1, 'WEST', 'The marble archway leads back to the main library.', NULL);
