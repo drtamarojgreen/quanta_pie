@@ -1,8 +1,8 @@
 #include "Room.h"
+#include "Character.h"
 #include <iostream>
 
-Room::Room(const std::string& description, int x, int y, int z)
-    : description(description), x(x), y(y), z(z) {}
+Room::Room(const std::string& description) : description(description) {}
 
 void Room::addExit(const std::string& direction, Room* room) {
     exits[direction] = room;
@@ -19,16 +19,12 @@ std::string Room::getDescription() const {
     return description;
 }
 
-int Room::getX() const {
-    return x;
+void Room::addCharacter(Character* character) {
+    characters.push_back(character);
 }
 
-int Room::getY() const {
-    return y;
-}
-
-int Room::getZ() const {
-    return z;
+const std::vector<Character*>& Room::getCharacters() const {
+    return characters;
 }
 
 void Room::printExits() const {

@@ -11,6 +11,9 @@ class Room;
  * @brief Represents the player in the game.
  *
  * This class stores information about the player, such as their current
+ * location. It provides methods to interact with and move the player
+ * within the game world.
+ */
  * location and other details from the database.
  */
 class Player {
@@ -23,22 +26,29 @@ public:
      * @param startingRoom A pointer to the Room where the player will start.
      */
     Player(int id, const std::string& name, const std::string& joinDate, Room* startingRoom);
-=======
-class Player {
+lass Player {
 public:
-    // Player's position vector
-    double x;
-    double y;
-
-    // Player's direction vector
-    double dirX;
-    double dirY;
-
-    // The camera plane, perpendicular to the direction
-    double planeX;
-    double planeY;
+    /**
+     * @brief Constructs a new Player object.
+     * @param startingRoom A pointer to the Room where the player will start.
+     */
+    Player(Room* startingRoom);
 
     /**
+     * @brief Moves the player to a new room.
+     * @param room A pointer to the new current Room.
+     */
+    void setCurrentRoom(Room* room);
+
+    /**
+     * @brief Gets the player's current room.
+     * @return A pointer to the Room the player is currently in.
+     */
+    Room* getCurrentRoom() const;
+
+    /**
+     * @brief Gets a string representation of the player for display.
+     * @return A string representing the player, e.g., "@".
      * @brief Gets the player's ID.
      * @return The player's ID.
      */
@@ -71,7 +81,10 @@ private:
      * @param startX The player's starting x-coordinate.
      * @param startY The player's starting y-coordinate.
      */
-    Player(double startX, double startY);
+    std::string getRepresentation() const;
+
+private:
+    Room* currentRoom;
 };
 
 #endif // PLAYER_H

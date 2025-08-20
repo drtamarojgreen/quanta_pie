@@ -104,6 +104,20 @@ INSERT INTO exits (exit_id, from_room_id, to_room_id, direction, description, is
 INSERT INTO exits (exit_id, from_room_id, to_room_id, direction, description, is_locked, key_tool_id) VALUES (21, 9, 10, 'east', 'A crack in the wall leads to the cavern of emotions.', FALSE, NULL);
 INSERT INTO exits (exit_id, from_room_id, to_room_id, direction, description, is_locked, key_tool_id) VALUES (22, 10, 9, 'west', 'A narrow crack in the wall leads back to the lab.', FALSE, NULL);
 
+
+--
+-- Collection: characters
+-- Description: Stores non-player characters (NPCs) in the game world.
+-- Fields:
+--   - character_id (NUMBER, PRIMARY KEY)
+--   - name (STRING)
+--   - description (STRING)
+--   - initial_room_id (NUMBER, FOREIGN KEY to rooms.room_id)
+--   - dialogue (STRING)
+--
+INSERT INTO characters (character_id, name, description, initial_room_id, dialogue) VALUES (1, 'The Guide', 'A calm and gentle figure stands here, radiating a quiet confidence. They offer a warm smile.', 11, 'What is one piece of evidence that supports your thought? And what is one piece that contradicts it?');
+INSERT INTO characters (character_id, name, description, initial_room_id, dialogue) VALUES (2, 'The Echo of Doubt', 'A flickering, shadowy figure darts around the edges of the room, muttering in a critical tone. It seems to be made of shifting doubt.', 6, 'You''ll probably fail, so why even try? You always mess things up.');
+
 -- =============================================================================
 -- Player and Session Data (Unchanged for this refactoring)
 -- =============================================================================

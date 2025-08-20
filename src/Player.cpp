@@ -1,4 +1,5 @@
 #include "Player.h"
+#include "Room.h"
 
 Player::Player(int id, const std::string& name, const std::string& joinDate, Room* startingRoom)
     : id(id), name(name), joinDate(joinDate), currentRoom(startingRoom) {}
@@ -17,10 +18,17 @@ Player::Player(double startX, double startY) {
     x = startX;
     y = startY;
 
-    // Initial direction vector (looking down the negative X axis)
-    dirX = -1.0;
-    dirY = 0.0;
+void Player::setCurrentRoom(Room* room) {
+    currentRoom = room;
+}
 
+Room* Player::getCurrentRoom() const {
+    return currentRoom;
+}
+
+std::string Player::getRepresentation() const {
+    return "  __\n (..)\n-(--)-\n /  \\";
+  
 int Player::getID() const {
     return id;
 }
