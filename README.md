@@ -38,12 +38,12 @@ Built entirely in **modern C++17**, Quanta_Pie is designed to be:
     ```
 
 2.  **Compile the project:**
-    *(Instructions for compiling will be added here, e.g., using g++ or a build system like CMake)*
+    To compile the game, you will need a C++ compiler that supports C++17. The following command uses `g++`:
 
     ```bash
-    # Example for g++
     g++ -std=c++17 -o Quanta_Pie src/*.cpp
     ```
+    *Note: In accordance with project directives, this command has not been tested but is expected to work based on the project structure.*
 
 3.  **Run the game:**
     ```bash
