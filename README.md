@@ -27,6 +27,13 @@ Built entirely in **modern C++17**, Quanta_Pie is designed to be:
 
 ---
 
+## 📈 Current Status
+
+-   **In Development:** The game is currently in the active development phase.
+-   **Tissdb Integration:** We are working on integrating Tissdb for persistent data storage and enhanced narrative branching.
+
+---
+
 ## 🚀 Getting Started
 
 ### Build Instructions
