@@ -164,95 +164,113 @@ void Game::start() {
     gameLoop();
 }
 
-void Game::printCurrentRoomInfo() {
-    if (!player) return;
+std::vector<std::string> Game::getRoomInfoLines() {
+    std::vector<std::string> lines;
+    if (!player) return lines;
 
     Room* currentRoom = player->getCurrentRoom();
-    std::cout << std::endl;
-    std::cout << currentRoom->getDescription() << std::endl;
+    lines.push_back(""); // Empty line for spacing
+    lines.push_back(currentRoom->getDescription());
 
     const auto& characters = currentRoom->getCharacters();
     if (!characters.empty()) {
-        std::cout << std::endl;
+        lines.push_back(""); // Empty line for spacing
         for (const auto& character : characters) {
-            std::cout << character->getDescription() << std::endl;
-            std::cout << "They say: \"" << character->getDialogue() << "\"" << std::endl;
+            lines.push_back(character->getDescription());
+            lines.push_back("They say: \"" + character->getDialogue() + "\"");
         }
     }
 
-    std::cout << std::endl << "It's you!" << std::endl;
-    std::cout << player->getRepresentation() << std::endl << std::endl;
-    currentRoom->printExits();
+    lines.push_back(""); // Empty line for spacing
+    lines.push_back("It's you!");
+    lines.push_back(player->getRepresentation());
+    lines.push_back(""); // Empty line for spacing
+
+    std::stringstream ss_exits;
+    ss_exits << "Available exits:";
+    for (auto const& [direction, room] : currentRoom->getAllExits()) { // Use getAllExits
+        ss_exits << " " << direction;
+    }
+    lines.push_back(ss_exits.str());
+    return lines;
+}
+
+std::vector<std::string> Game::getSidePanelLines() {
+    std::vector<std::string> lines;
+    if (!player) return lines;
+
+    Room* currentRoom = player->getCurrentRoom();
+
+    lines.push_back("----------------------------------------");
+    lines.push_back("               GAME INFO                ");
+    lines.push_back("----------------------------------------");
+    lines.push_back("Score: " + std::to_string(player->getScore()));
+    lines.push_back("----------------------------------------");
+    lines.push_back("               HELP                     ");
+    lines.push_back("  - up/north, down/south, left/west, right/east to move.");
+    lines.push_back("  - 'look': Look around.");
+    lines.push_back("  - 'dance': Do a jig.");
+    lines.push_back("  - 'help': Show commands.");
+    lines.push_back("  - 'quit': Exit game.");
+    lines.push_back("----------------------------------------");
+    lines.push_back("               MAP                      ");
+    lines.push_back("----------------------------------------");
+
+    // Simple map representation
+    std::map<std::string, Room*> exits = currentRoom->getAllExits();
+
+    lines.push_back("       ");
+    if (exits.count("north")) lines.back() += "[ ]"; else lines.back() += "   ";
+    lines.push_back("       |");
+    lines.push_back("       |");
+    std::string middle_map_line = "";
+    if (exits.count("west")) middle_map_line += "[ ]---"; else middle_map_line += "      ";
+    middle_map_line += "[X]"; // Current room
+    if (exits.count("east")) middle_map_line += "---[ ]";
+    lines.push_back(middle_map_line);
+    lines.push_back("       |");
+    lines.push_back("       |");
+    lines.push_back("       ");
+    if (exits.count("south")) lines.back() += "[ ]"; else lines.back() += "   ";
+
+    lines.push_back("----------------------------------------");
+    return lines;
+}
+
+void Game::displayGameScreen() {
+    // Clear screen using Windows API
+    ClearConsoleRegion(0, 0, 120, 50); // Clear a large enough area
+
+    std::vector<std::string> room_lines = getRoomInfoLines();
+    std::vector<std::string> side_panel_lines = getSidePanelLines();
+
+    // Determine max height
+    size_t max_height = std::max(room_lines.size(), side_panel_lines.size());
+
+    const int GAME_AREA_WIDTH = 60; // Adjust as needed
+    const int SIDE_PANEL_START_X = GAME_AREA_WIDTH + 2; // 2 spaces between game area and side panel
+
+    for (size_t i = 0; i < max_height; ++i) {
+        std::string room_line = (i < room_lines.size()) ? room_lines[i] : "";
+        std::string side_panel_line = (i < side_panel_lines.size()) ? side_panel_lines[i] : "";
+
+        // Print room line
+        SetCursorPosition(0, i);
+        std::cout << room_line;
+
+        // Print side panel line
+        SetCursorPosition(SIDE_PANEL_START_X, i);
+        std::cout << side_panel_line;
+    }
+    // Set cursor position for input prompt
+    SetCursorPosition(0, max_height + 1);
 }
 
 void Game::printWelcomeMessage() {
     std::cout << "Welcome to Quanta_Pie!" << std::endl;
     std::cout << "----------------------------------------" << std::endl;
-    printCurrentRoomInfo();
-    printHelp();
-}
-
-void Game::printHelp() {
-    std::cout << std::endl;
-    std::cout << "--- Game Commands ---" << std::endl;
-    std::cout << "  - [direction]: Type 'north', 'south', 'east', or 'west' to move." << std::endl;
-    std::cout << "  - 'look':         Look around the room again." << std::endl;
-    std::cout << "  - 'dance':        Do a little dance." << std::endl;
-    std::cout << "  - 'help':         Show this list of commands." << std::endl;
-    std::cout << "  - 'quit':         Exit the game." << std::endl;
-    std::cout << "---------------------" << std::endl;
-    std::cout << std::endl;
-}
-
-void Game::printSidePanel() {
-    if (!player) return;
-
-    Room* currentRoom = player->getCurrentRoom();
-
-    // Clear screen (platform-specific, for simplicity, just print newlines)
-    // For a true clear screen, platform-specific calls like system("cls") or system("clear") would be needed,
-    // but are generally avoided in portable C++ applications.
-    for (int i = 0; i < 50; ++i) {
-        std::cout << std::endl;
-    }
-
-    std::cout << "----------------------------------------" << std::endl;
-    std::cout << "               GAME INFO                " << std::endl;
-    std::cout << "----------------------------------------" << std::endl;
-    std::cout << "Score: " << player->getScore() << std::endl;
-    std::cout << "----------------------------------------" << std::endl;
-    std::cout << "               HELP                     " << std::endl;
-    std::cout << "  - up/north, down/south, left/west, right/east to move." << std::endl;
-    std::cout << "  - 'look': Look around." << std::endl;
-    std::cout << "  - 'dance': Do a jig." << std::endl;
-    std::cout << "  - 'help': Show commands." << std::endl;
-    std::cout << "  - 'quit': Exit game." << std::endl;
-    std::cout << "----------------------------------------" << std::endl;
-    std::cout << "               MAP                      " << std::endl;
-    std::cout << "----------------------------------------" << std::endl;
-
-    // Simple map representation
-    // This assumes a grid-like layout, which might not be true for all room connections.
-    // For a more accurate map, a graph traversal and rendering would be needed.
-    // For now, just show current room and direct exits.
-    std::map<std::string, Room*> exits = currentRoom->getAllExits();
-
-    std::cout << "       ";
-    if (exits.count("north")) std::cout << "[ ]"; else std::cout << "   ";
-    std::cout << std::endl;
-    std::cout << "       |" << std::endl;
-    std::cout << "       |" << std::endl;
-    if (exits.count("west")) std::cout << "[ ]---"; else std::cout << "      ";
-    std::cout << "[X]"; // Current room
-    if (exits.count("east")) std::cout << "---[ ]";
-    std::cout << std::endl;
-    std::cout << "       |" << std::endl;
-    std::cout << "       |" << std::endl;
-    std::cout << "       ";
-    if (exits.count("south")) std::cout << "[ ]"; else std::cout << "   ";
-    std::cout << std::endl;
-
-    std::cout << "----------------------------------------" << std::endl;
+    displayGameScreen(); // Use the new display function
+    // printHelp(); // Help is now part of the side panel
 }
 
 void Game::gameLoop() {
@@ -261,7 +279,7 @@ void Game::gameLoop() {
             gameOver = true;
             continue;
         }
-        printSidePanel(); // Display side panel at the beginning of each loop
+        displayGameScreen(); // Display combined screen at the beginning of each loop
         std::cout << "> ";
 
         int ch = _getch(); // Read a single character
@@ -316,10 +334,12 @@ void Game::processInput(const std::string& input) {
     std::transform(lowerInput.begin(), lowerInput.end(), lowerInput.begin(), ::tolower);
 
     if (lowerInput == "help") {
-        printHelp();
+        // Help is now part of the side panel, no separate print needed here
+        // Or, if a specific help message is desired, it should be handled differently
     } else if (lowerInput == "look") {
-        printCurrentRoomInfo();
+        // Look just updates the display, which happens automatically in gameLoop
     } else if (lowerInput == "dance") {
+        // This is a temporary message, will be replaced by combat/action messages
         std::cout << "You do a little jig. It's surprisingly uplifting." << std::endl;
     } else if (lowerInput == "up") {
         processInput("north"); // Map 'up' to 'north'
@@ -338,8 +358,10 @@ void Game::processInput(const std::string& input) {
         if (nextRoom != nullptr) {
             player->setCurrentRoom(nextRoom);
             player->incrementScore(); // Increment score on successful move
-            printCurrentRoomInfo();
+            // No printCurrentRoomInfo() here, displayGameScreen() handles it
         } else {
+            // This message will be overwritten by the next displayGameScreen() call
+            // Consider a temporary message area or a more robust message system
             std::cout << "You can't go that way. Type 'help' for a list of commands." << std::endl;
         }
     }

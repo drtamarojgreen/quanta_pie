@@ -1,5 +1,6 @@
 #include "Room.h"
 #include "Character.h"
+#include "Challenge.h" // Include Challenge.h
 #include <iostream>
 
 Room::Room(const std::string& description) : description(description) {}
@@ -29,6 +30,14 @@ const std::vector<Character*>& Room::getCharacters() const {
 
 const std::map<std::string, Room*>& Room::getAllExits() const {
     return exits;
+}
+
+void Room::setChallenge(std::unique_ptr<Challenge> challenge) {
+    room_challenge = std::move(challenge);
+}
+
+Challenge* Room::getChallenge() const {
+    return room_challenge.get();
 }
 
 void Room::printExits() const {

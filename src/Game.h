@@ -5,11 +5,13 @@
 #include <string>
 #include <fstream>
 #include <memory> // For std::unique_ptr
+#include <windows.h> // Required for HANDLE
 #include "Player.h"
 #include "Room.h"
 #include "GameSession.h"
 #include "Score.h"
 #include "Character.h" // Include full definition of Character
+#include "Challenge.h" // Include Challenge definition
 
 extern volatile sig_atomic_t g_signal_received; // Declare global signal flag
 
@@ -62,6 +64,7 @@ private:
     std::vector<std::unique_ptr<Character>> allCharacters;
     bool gameOver;
     HANDLE hConsole; // Console handle for advanced console manipulation
+    std::unique_ptr<Challenge> current_challenge; // The currently active CBT challenge
 };
 
 #endif // GAME_H

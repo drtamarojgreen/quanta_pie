@@ -61,11 +61,14 @@ public:
      */
     const std::vector<Character*>& getCharacters() const;
     const std::map<std::string, Room*>& getAllExits() const; // New function to get all exits
+    void setChallenge(std::unique_ptr<Challenge> challenge); // Set a challenge for this room
+    Challenge* getChallenge() const; // Get the challenge for this room
 
 private:
     std::string description;
     std::map<std::string, Room*> exits;
     std::vector<Character*> characters;
+    std::unique_ptr<Challenge> room_challenge; // Optional challenge for the room
 };
 
 #endif // ROOM_H
