@@ -9,6 +9,43 @@ Game::Game() : player(nullptr), gameOver(false) {
     // The player will be initialized in createWorld
 }
 
+#include <string>
+#include <vector>
+#include <sstream>
+
+// Helper function to extract values from an SQL INSERT statement.
+// This is a simple parser and not robust for general SQL.
+std::vector<std::string> parseValues(const std::string& line) {
+    std::vector<std::string> values;
+    size_t start = line.find('(');
+    size_t end = line.find(')');
+    if (start == std::string::npos || end == std::string::npos) {
+        return values;
+    }
+    std::string content = line.substr(start + 1, end - start - 1);
+    std::stringstream ss(content);
+    std::string value;
+    while (std::getline(ss, value, ',')) {
+        // Trim leading whitespace
+        size_t first = value.find_first_not_of(" \t\n\r");
+        if (std::string::npos != first) {
+            value = value.substr(first);
+        }
+        // Trim trailing whitespace
+        size_t last = value.find_last_not_of(" \t\n\r");
+        if (std::string::npos != last) {
+            value = value.substr(0, last + 1);
+        }
+        // Remove single quotes if they exist
+        if (value.front() == '\'' && value.back() == '\'') {
+            value = value.substr(1, value.length() - 2);
+        }
+        values.push_back(value);
+    }
+    return values;
+}
+
+
 Game::~Game() {
     delete player;
     for (auto room : allRooms) {
@@ -16,44 +53,48 @@ Game::~Game() {
     }
     for (auto character : allCharacters) {
         delete character;
+    // The 'player' pointer is a reference to an object within 'allPlayers',
+    // so it should not be deleted separately.
+    for (auto p : allPlayers) {
+        delete p;
+    }
+    for (auto r : allRooms) {
+        delete r;
+    }
+    for (auto gs : allGameSessions) {
+        delete gs;
+    }
+    for (auto s : allScores) {
+        delete s;
     }
 }
 
 void Game::createWorld() {
     // Load room data from the SQL file
+    // Load all game data from the SQL file
     loadDataFromSQL("sql/game_data.sql");
 
-    // The current implementation of loadDataFromSQL does not allow for linking rooms
-    // by name or ID. The old linking logic is left here as a reference, but it will
-    // not work as is, because the pointers (library, archives, readingNook) no longer exist.
-    // This is in accordance with the "Gated Direct-to-Publish Protocol".
-
-    // Link the rooms (This part will not work without specific room pointers)
-    // if (allRooms.size() >= 3) {
-    //     allRooms[0]->addExit("north", allRooms[1]);
-    //     allRooms[0]->addExit("east", allRooms[2]);
-    //     allRooms[1]->addExit("south", allRooms[0]);
-    //     allRooms[2]->addExit("west", allRooms[0]);
-    // }
-
-    // Create the player and set the starting room.
-    // The player will start in the first room loaded from the SQL file.
-    if (!allRooms.empty()) {
-        player = new Player(allRooms[0]);
+    // Assign the first loaded player as the main player character.
+    if (!allPlayers.empty()) {
+        player = allPlayers[0];
+        // Assign the first loaded room as the starting location for the main player.
+        if (!allRooms.empty()) {
+            player->setCurrentRoom(allRooms[0]);
+        }
     } else {
-        // As a fallback, create a default room if the SQL file is empty or fails to load
-        Room* defaultRoom = new Room("You are in an empty, non-descript void. Something went wrong with the world creation.");
-        allRooms.push_back(defaultRoom);
-        player = new Player(defaultRoom);
+        // Fallback: if no players or rooms are loaded, create defaults.
+        if (allRooms.empty()) {
+            Room* defaultRoom = new Room("A non-descript, empty void.");
+            allRooms.push_back(defaultRoom);
+        }
+        player = new Player(0, "Default Player", "unknown", allRooms[0]);
+        allPlayers.push_back(player);
     }
 }
 
 void Game::loadDataFromSQL(const std::string& filename) {
     std::ifstream sqlFile(filename);
     if (!sqlFile.is_open()) {
-        // Since this is a text-based game, we can report errors to std::cerr.
-        // In a real application, you might use a more robust logging system.
-        // std::cerr << "Error: Could not open SQL file " << filename << std::endl;
         return;
     }
 
@@ -114,6 +155,26 @@ void Game::loadDataFromSQL(const std::string& filename) {
 
             if (roomId > 0 && roomId <= allRooms.size()) {
                 allRooms[roomId - 1]->addCharacter(newCharacter);
+        if (line.find("INSERT INTO players") != std::string::npos) {
+            std::vector<std::string> values = parseValues(line);
+            if (values.size() == 3) {
+                allPlayers.push_back(new Player(std::stoi(values[0]), values[1], values[2], nullptr));
+            }
+        } else if (line.find("INSERT INTO game_sessions") != std::string::npos) {
+            std::vector<std::string> values = parseValues(line);
+            if (values.size() == 4) {
+                allGameSessions.push_back(new GameSession(std::stoi(values[0]), values[1], values[2], values[3]));
+            }
+        } else if (line.find("INSERT INTO scores") != std::string::npos) {
+            std::vector<std::string> values = parseValues(line);
+            if (values.size() == 4) {
+                allScores.push_back(new Score(std::stoi(values[0]), std::stoi(values[1]), std::stoi(values[2]), std::stoi(values[3])));
+            }
+        } else if (line.find("INSERT INTO rooms") != std::string::npos) {
+            std::vector<std::string> values = parseValues(line);
+            // The rooms table has description and ascii art, we only use description
+            if (values.size() >= 2) {
+                allRooms.push_back(new Room(values[1]));
             }
         }
     }
