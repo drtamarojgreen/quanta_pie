@@ -4,10 +4,13 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include "Player.h"
+#include "Room.h"
+#include "GameSession.h"
+#include "Score.h"
 
-// Forward declarations
-class Player;
-class Room;
+// Forward declarations are no longer needed for Player and Room
+// as we are now including the full headers.
 
 /**
  * @class Game
@@ -42,8 +45,12 @@ private:
     void printHelp();
     void loadDataFromSQL(const std::string& filename);
 
-    Player* player;
+    Player* player; // The main player character
     std::vector<Room*> allRooms;
+    std::vector<Player*> allPlayers;
+    std::vector<GameSession*> allGameSessions;
+    std::vector<Score*> allScores;
+
     bool gameOver;
 };
 
