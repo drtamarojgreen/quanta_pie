@@ -10,6 +10,7 @@ public:
     Player(int id, const std::string& name, const std::string& joinDate, Room* startingRoom);
     Player(Room* startingRoom);
 
+    void move(const std::string& direction); // For testing purposes
     void setCurrentRoom(Room* room);
     Room* getCurrentRoom() const;
     int getID() const;

@@ -11,6 +11,8 @@
 
 // Forward declarations
 class Player;
+class Character;
+class Challenge;
 
 /**
  * @class Room
@@ -26,6 +28,7 @@ public:
      * @param description A text description of the room.
      */
     Room(const std::string& description);
+    ~Room(); // Destructor
 
     /**
      * @brief Adds an exit to the room.

@@ -3,6 +3,9 @@
 
 #include <string>
 
+// Forward declaration of Room to avoid circular dependency
+class Room;
+
 class Character {
 public:
     Character(const std::string& name, const std::string& description, const std::string& dialogue);

@@ -6,6 +6,7 @@
 #include "GameSession.h"
 #include "Score.h"
 #include "CSVParser.h"
+#include "platform/WindowsConsole.h" // Include the Windows-specific console implementation
 #include <iostream>
 #include <string>
 #include <vector>
@@ -13,55 +14,15 @@
 #include <memory>
 #include <algorithm> // Required for std::transform
 #include <cctype>    // Required for ::tolower
-#ifdef _WIN32
-#include <conio.h>   // Required for _getch() and _kbhit() on Windows
-#include <windows.h> // Required for Windows console API
-#endif
-
-Game::Game() : player(nullptr), gameOver(false), current_challenge(nullptr) {
-#ifdef _WIN32
-    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-#endif
+Game::Game() : console(std::make_unique<WindowsConsole>()), player(nullptr), gameOver(false), current_challenge(nullptr) {
     createWorld("sql/game_data.sql"); // This will be ignored now, but keeping for compatibility
 }
 
-Game::Game(const std::string& sql_file_path) : player(nullptr), gameOver(false), current_challenge(nullptr) {
-#ifdef _WIN32
-    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-#endif
+Game::Game(const std::string& sql_file_path) : console(std::make_unique<WindowsConsole>()), player(nullptr), gameOver(false), current_challenge(nullptr) {
     createWorld(sql_file_path); // This will be ignored now, but keeping for compatibility
 }
 
-// Destructor is now defaulted in Game.h due to unique_ptr usage
-
-#ifdef _WIN32
-// Helper function to set cursor position
-void SetCursorPosition(int x, int y) {
-    COORD coord;
-    coord.X = x;
-    coord.Y = y;
-    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
-}
-
-// Helper function to clear a specific region of the console
-void ClearConsoleRegion(int x, int y, int width, int height) {
-    DWORD count;
-    COORD coord = { (SHORT)x, (SHORT)y };
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-
-    GetConsoleScreenBufferInfo(hConsole, &csbi);
-
-    // Fill the region with spaces
-    FillConsoleOutputCharacter(hConsole, (TCHAR) ' ', width * height, coord, &count);
-
-    // Fill the region with the current background color
-    FillConsoleOutputAttribute(hConsole, csbi.wAttributes, width * height, coord, &count);
-
-    // Set the cursor to the top-left of the region
-    SetConsoleCursorPosition(hConsole, coord);
-}
-#endif
+Game::~Game() = default; // Explicitly defaulted in .cpp file
 
 void Game::createWorld(const std::string& sql_file_path) {
     // Load all game data from the CSV files
@@ -163,6 +124,28 @@ void Game::loadDataFromCSV() {
             allScores.push_back(std::make_unique<Score>(std::stoi(scoreData[i][0]), std::stoi(scoreData[i][1]), std::stoi(scoreData[i][2]), std::stoi(scoreData[i][3])));
         } else {
             std::cerr << "Error: Malformed score data at row " << i << std::endl;
+        }
+    }
+
+    // Load Tools
+    std::vector<std::vector<std::string>> toolData = CSVParser::readCSV("sql/tools.csv");
+    std::cout << "Loading Tools..." << std::endl;
+    for (size_t i = 1; i < toolData.size(); ++i) { // Skip header row
+        if (toolData[i].size() > 3) {
+            allTools.push_back(std::make_unique<Tool>(std::stoi(toolData[i][0]), toolData[i][1], toolData[i][2], std::stoi(toolData[i][3])));
+        } else {
+            std::cerr << "Error: Malformed tool data at row " << i << std::endl;
+        }
+    }
+
+    // Load RoomObjects
+    std::vector<std::vector<std::string>> roomObjectData = CSVParser::readCSV("sql/room_objects.csv");
+    std::cout << "Loading RoomObjects..." << std::endl;
+    for (size_t i = 1; i < roomObjectData.size(); ++i) { // Skip header row
+        if (roomObjectData[i].size() > 3) {
+            allRoomObjects.push_back(std::make_unique<RoomObject>(std::stoi(roomObjectData[i][0]), roomObjectData[i][1], roomObjectData[i][2], std::stoi(roomObjectData[i][3])));
+        } else {
+            std::cerr << "Error: Malformed room object data at row " << i << std::endl;
         }
     }
 
@@ -279,9 +262,8 @@ std::vector<std::string> Game::getSidePanelLines() {
 }
 
 void Game::displayGameScreen() {
-#ifdef _WIN32
-    // Clear screen using Windows API
-    ClearConsoleRegion(0, 0, 120, 50); // Clear a large enough area
+    // Clear screen using the console abstraction
+    console->clear();
 
     std::vector<std::string> room_lines = getRoomInfoLines();
     std::vector<std::string> side_panel_lines = getSidePanelLines();
@@ -297,26 +279,15 @@ void Game::displayGameScreen() {
         std::string side_panel_line = (i < side_panel_lines.size()) ? side_panel_lines[i] : "";
 
         // Print room line
-        SetCursorPosition(0, i);
+        console->setCursorPosition(0, i);
         std::cout << room_line;
 
         // Print side panel line
-        SetCursorPosition(SIDE_PANEL_START_X, i);
+        console->setCursorPosition(SIDE_PANEL_START_X, i);
         std::cout << side_panel_line;
     }
     // Set cursor position for input prompt
-    SetCursorPosition(0, max_height + 1);
-#else
-    // A simpler, cross-platform display
-    std::vector<std::string> room_lines = getRoomInfoLines();
-    for(const auto& line : room_lines) {
-        std::cout << line << std::endl;
-    }
-    std::vector<std::string> side_panel_lines = getSidePanelLines();
-    for(const auto& line : side_panel_lines) {
-        std::cout << line << std::endl;
-    }
-#endif
+    console->setCursorPosition(0, max_height + 1);
 }
 
 void Game::printWelcomeMessage() {
@@ -335,12 +306,11 @@ void Game::gameLoop() {
         displayGameScreen(); // Display combined screen at the beginning of each loop
         std::cout << "> ";
 
-#ifdef _WIN32
-        int ch = _getch(); // Read a single character
+        int ch = console->getChar(); // Read a single character
 
         // Handle extended keys (like arrow keys)
         if (ch == 0 || ch == 0xE0) {
-            ch = _getch(); // Read the second byte for extended key
+            ch = console->getChar(); // Read the second byte for extended key
             switch (ch) {
                 case 72: // Up arrow
                     processInput("north");
