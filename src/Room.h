@@ -8,8 +8,8 @@
 
 // Forward declarations
 class Player;
-#include "objects/Character.h" // Include Character.h from new location
-#include "objects/Challenge.h" // Include Challenge.h from new location
+class Character;
+class Challenge;
 
 /**
  * @class Room
@@ -25,6 +25,7 @@ public:
      * @param description A text description of the room.
      */
     Room(const std::string& description);
+    ~Room(); // Destructor
 
     /**
      * @brief Adds an exit to the room.
