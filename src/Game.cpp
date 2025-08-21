@@ -2,6 +2,9 @@
 #include "players/Player.h"
 #include "Room.h"
 #include "objects/Character.h"
+#include "objects/Challenge.h"
+#include "GameSession.h"
+#include "Score.h"
 #include "CSVParser.h"
 #include <iostream>
 #include <string>
@@ -10,19 +13,28 @@
 #include <memory>
 #include <algorithm> // Required for std::transform
 #include <cctype>    // Required for ::tolower
+#ifdef _WIN32
 #include <conio.h>   // Required for _getch() and _kbhit() on Windows
 #include <windows.h> // Required for Windows console API
+#endif
 
-Game::Game() : player(nullptr), gameOver(false), hConsole(GetStdHandle(STD_OUTPUT_HANDLE)), current_challenge(nullptr) {
+Game::Game() : player(nullptr), gameOver(false), current_challenge(nullptr) {
+#ifdef _WIN32
+    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+#endif
     createWorld("sql/game_data.sql"); // This will be ignored now, but keeping for compatibility
 }
 
-Game::Game(const std::string& sql_file_path) : player(nullptr), gameOver(false), hConsole(GetStdHandle(STD_OUTPUT_HANDLE)), current_challenge(nullptr) {
+Game::Game(const std::string& sql_file_path) : player(nullptr), gameOver(false), current_challenge(nullptr) {
+#ifdef _WIN32
+    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+#endif
     createWorld(sql_file_path); // This will be ignored now, but keeping for compatibility
 }
 
 // Destructor is now defaulted in Game.h due to unique_ptr usage
 
+#ifdef _WIN32
 // Helper function to set cursor position
 void SetCursorPosition(int x, int y) {
     COORD coord;
@@ -49,6 +61,7 @@ void ClearConsoleRegion(int x, int y, int width, int height) {
     // Set the cursor to the top-left of the region
     SetConsoleCursorPosition(hConsole, coord);
 }
+#endif
 
 void Game::createWorld(const std::string& sql_file_path) {
     // Load all game data from the CSV files
@@ -63,14 +76,14 @@ void Game::createWorld(const std::string& sql_file_path) {
             // Example: Add a challenge to the starting room
             if (allRooms[0]->getChallenge() == nullptr) {
                 std::vector<CBTChoice> choices;
-                choices.push_back({"Challenge the thought", [this](Game& game){
-                    game.player->incrementScore(10);
-                    game.current_challenge = nullptr; // Resolve challenge
+                choices.push_back({"Challenge the thought", [this](){
+                    this->player->incrementScore(10);
+                    this->current_challenge = nullptr; // Resolve challenge
                     // Add more complex outcomes here
                 }});
-                choices.push_back({"Accept the thought", [this](Game& game){
-                    game.player->incrementScore(-5);
-                    game.current_challenge = nullptr; // Resolve challenge
+                choices.push_back({"Accept the thought", [this](){
+                    this->player->incrementScore(-5);
+                    this->current_challenge = nullptr; // Resolve challenge
                     // Add more complex outcomes here
                 }});
                 allRooms[0]->setChallenge(std::make_unique<Challenge>("You feel overwhelmed by the vastness of the void.", choices));
@@ -266,6 +279,7 @@ std::vector<std::string> Game::getSidePanelLines() {
 }
 
 void Game::displayGameScreen() {
+#ifdef _WIN32
     // Clear screen using Windows API
     ClearConsoleRegion(0, 0, 120, 50); // Clear a large enough area
 
@@ -292,6 +306,17 @@ void Game::displayGameScreen() {
     }
     // Set cursor position for input prompt
     SetCursorPosition(0, max_height + 1);
+#else
+    // A simpler, cross-platform display
+    std::vector<std::string> room_lines = getRoomInfoLines();
+    for(const auto& line : room_lines) {
+        std::cout << line << std::endl;
+    }
+    std::vector<std::string> side_panel_lines = getSidePanelLines();
+    for(const auto& line : side_panel_lines) {
+        std::cout << line << std::endl;
+    }
+#endif
 }
 
 void Game::printWelcomeMessage() {
@@ -310,6 +335,7 @@ void Game::gameLoop() {
         displayGameScreen(); // Display combined screen at the beginning of each loop
         std::cout << "> ";
 
+#ifdef _WIN32
         int ch = _getch(); // Read a single character
 
         // Handle extended keys (like arrow keys)
@@ -368,6 +394,15 @@ void Game::gameLoop() {
                 processInput(input_str);
             }
         }
+#else
+        std::string input_line;
+        std::getline(std::cin, input_line);
+        if (input_line == "quit") {
+            gameOver = true;
+        } else {
+            processInput(input_line);
+        }
+#endif
     }
     std::cout << "Thank you for playing Quanta_Pie!" << std::endl;
 }

@@ -1,6 +1,7 @@
 #include "TestRunner.h"
 #include "../src/Room.h"
 #include "../src/players/Player.h"
+#include "../src/objects/Character.h"
 #include <vector>
 #include <string>
 
@@ -12,16 +13,16 @@ bool testPlayerMovement() {
     room1.addExit("north", &room2);
     room2.addExit("south", &room1);
 
-    Player player("Test Player", &room1);
+    Player player(1, "Test Player", "2023-01-01", &room1);
 
     // WHEN the player moves to the next room
-    player.move("north");
+    player.setCurrentRoom(room1.getExit("north"));
 
     // THEN the player should be in the new room
     ASSERT_EQ(player.getCurrentRoom(), &room2);
 
     // WHEN the player moves back
-    player.move("south");
+    player.setCurrentRoom(room2.getExit("south"));
 
     // THEN the player should be back in the starting room
     ASSERT_EQ(player.getCurrentRoom(), &room1);
@@ -33,9 +34,9 @@ bool testPlayerMovement() {
 bool testEncounterCharacter() {
     // GIVEN a room with a character in it
     Room room("A room with a character");
-    Character character(1, "NPC", "A mysterious non-player character.");
+    Character character("NPC", "A mysterious non-player character.", "Hello!");
     room.addCharacter(&character);
-    Player player("Test Player", &room);
+    Player player(1, "Test Player", "2023-01-01", &room);
 
     // WHEN the player is in the room
     // (No action needed, the check is on the state)

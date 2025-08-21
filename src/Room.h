@@ -6,10 +6,11 @@
 #include <vector>
 #include <memory> // For std::unique_ptr
 
+#include "objects/Character.h"
+#include "objects/Challenge.h"
+
 // Forward declarations
 class Player;
-#include "objects/Character.h" // Include Character.h from new location
-#include "objects/Challenge.h" // Include Challenge.h from new location
 
 /**
  * @class Room

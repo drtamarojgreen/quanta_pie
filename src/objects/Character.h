@@ -2,7 +2,6 @@
 #define CHARACTER_H
 
 #include <string>
-#include "../Room.h" // Include Room.h from its new location
 
 class Character {
 public:
