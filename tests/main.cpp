@@ -1,4 +1,8 @@
 #include "TestRunner.h"
+#include <csignal>
+
+// Global flag for signal handling
+volatile sig_atomic_t g_signal_received = 0;
 
 // Forward declarations for test registration functions
 void registerUnitTests(TestRunner& runner);

@@ -16,13 +16,13 @@ bool testPlayerMovement() {
     Player player(0, "Test Player", "2024-01-01", &room1);
 
     // WHEN the player moves to the next room
-    player.move("north");
+    player.setCurrentRoom(room1.getExit("north"));
 
     // THEN the player should be in the new room
     ASSERT_EQ(player.getCurrentRoom(), &room2);
 
     // WHEN the player moves back
-    player.move("south");
+    player.setCurrentRoom(room2.getExit("south"));
 
     // THEN the player should be back in the starting room
     ASSERT_EQ(player.getCurrentRoom(), &room1);

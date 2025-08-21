@@ -2,6 +2,9 @@
 #include "players/Player.h"
 #include "Room.h"
 #include "objects/Character.h"
+#include "objects/Challenge.h"
+#include "GameSession.h"
+#include "Score.h"
 #include "CSVParser.h"
 #include "platform/WindowsConsole.h" // Include the Windows-specific console implementation
 #include <iostream>
@@ -11,7 +14,6 @@
 #include <memory>
 #include <algorithm> // Required for std::transform
 #include <cctype>    // Required for ::tolower
-
 Game::Game() : console(std::make_unique<WindowsConsole>()), player(nullptr), gameOver(false), current_challenge(nullptr) {
     createWorld("sql/game_data.sql"); // This will be ignored now, but keeping for compatibility
 }
@@ -35,14 +37,14 @@ void Game::createWorld(const std::string& sql_file_path) {
             // Example: Add a challenge to the starting room
             if (allRooms[0]->getChallenge() == nullptr) {
                 std::vector<CBTChoice> choices;
-                choices.push_back({"Challenge the thought", [this](Game& game){
-                    game.player->incrementScore(10);
-                    game.current_challenge = nullptr; // Resolve challenge
+                choices.push_back({"Challenge the thought", [this](){
+                    this->player->incrementScore(10);
+                    this->current_challenge = nullptr; // Resolve challenge
                     // Add more complex outcomes here
                 }});
-                choices.push_back({"Accept the thought", [this](Game& game){
-                    game.player->incrementScore(-5);
-                    game.current_challenge = nullptr; // Resolve challenge
+                choices.push_back({"Accept the thought", [this](){
+                    this->player->incrementScore(-5);
+                    this->current_challenge = nullptr; // Resolve challenge
                     // Add more complex outcomes here
                 }});
                 allRooms[0]->setChallenge(std::make_unique<Challenge>("You feel overwhelmed by the vastness of the void.", choices));
@@ -362,6 +364,15 @@ void Game::gameLoop() {
                 processInput(input_str);
             }
         }
+#else
+        std::string input_line;
+        std::getline(std::cin, input_line);
+        if (input_line == "quit") {
+            gameOver = true;
+        } else {
+            processInput(input_line);
+        }
+#endif
     }
     std::cout << "Thank you for playing Quanta_Pie!" << std::endl;
 }

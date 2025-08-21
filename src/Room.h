@@ -6,6 +6,9 @@
 #include <vector>
 #include <memory> // For std::unique_ptr
 
+#include "objects/Character.h"
+#include "objects/Challenge.h"
+
 // Forward declarations
 class Player;
 class Character;

@@ -71,6 +71,7 @@ private:
     std::vector<std::unique_ptr<Tool>> allTools;
     std::vector<std::unique_ptr<RoomObject>> allRoomObjects;
     bool gameOver;
+#endif
     std::unique_ptr<Challenge> current_challenge; // The currently active CBT challenge
 };
 
