@@ -5,6 +5,8 @@
 
 Room::Room(const std::string& description) : description(description) {}
 
+Room::~Room() = default;
+
 void Room::addExit(const std::string& direction, Room* room) {
     exits[direction] = room;
 }

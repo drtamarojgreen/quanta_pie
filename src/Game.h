@@ -5,13 +5,16 @@
 #include <string>
 #include <fstream>
 #include <memory> // For std::unique_ptr
-#include <windows.h> // Required for HANDLE
+#include <csignal> // For sig_atomic_t
 #include "players/Player.h"
 #include "Room.h"
 #include "GameSession.h"
 #include "Score.h"
 #include "objects/Character.h" // Include full definition of Character
 #include "objects/Challenge.h" // Include Challenge definition
+
+// Forward declaration for the Console class to avoid including platform-specific headers
+class Console;
 
 extern volatile sig_atomic_t g_signal_received; // Declare global signal flag
 
@@ -38,7 +41,7 @@ public:
     /**
      * @brief Destroys the Game object, cleaning up allocated resources.
      */
-    ~Game() = default; // With unique_ptr, default destructor is fine
+    ~Game(); // Defined in .cpp to handle unique_ptr to incomplete type
 
     /**
      * @brief Starts the game, displaying the welcome message and beginning the main loop.
@@ -56,6 +59,7 @@ private:
     std::vector<std::string> getSidePanelLines(); // Modified to return lines
     void displayGameScreen(); // New function to display combined screen
 
+    std::unique_ptr<Console> console; // Platform-agnostic console interface
     std::unique_ptr<Player> player; // The main player character
     std::vector<std::unique_ptr<Room>> allRooms;
     std::vector<std::unique_ptr<Player>> allPlayers;
@@ -63,7 +67,6 @@ private:
     std::vector<std::unique_ptr<Score>> allScores;
     std::vector<std::unique_ptr<Character>> allCharacters;
     bool gameOver;
-    HANDLE hConsole; // Console handle for advanced console manipulation
     std::unique_ptr<Challenge> current_challenge; // The currently active CBT challenge
 };
 
