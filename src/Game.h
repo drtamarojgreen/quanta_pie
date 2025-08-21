@@ -12,6 +12,8 @@
 #include "Score.h"
 #include "objects/Character.h" // Include full definition of Character
 #include "objects/Challenge.h" // Include Challenge definition
+#include "objects/Tool.h"
+#include "objects/RoomObject.h"
 
 extern volatile sig_atomic_t g_signal_received; // Declare global signal flag
 
@@ -62,6 +64,8 @@ private:
     std::vector<std::unique_ptr<GameSession>> allGameSessions;
     std::vector<std::unique_ptr<Score>> allScores;
     std::vector<std::unique_ptr<Character>> allCharacters;
+    std::vector<std::unique_ptr<Tool>> allTools;
+    std::vector<std::unique_ptr<RoomObject>> allRoomObjects;
     bool gameOver;
     HANDLE hConsole; // Console handle for advanced console manipulation
     std::unique_ptr<Challenge> current_challenge; // The currently active CBT challenge

@@ -153,6 +153,28 @@ void Game::loadDataFromCSV() {
         }
     }
 
+    // Load Tools
+    std::vector<std::vector<std::string>> toolData = CSVParser::readCSV("sql/tools.csv");
+    std::cout << "Loading Tools..." << std::endl;
+    for (size_t i = 1; i < toolData.size(); ++i) { // Skip header row
+        if (toolData[i].size() > 3) {
+            allTools.push_back(std::make_unique<Tool>(std::stoi(toolData[i][0]), toolData[i][1], toolData[i][2], std::stoi(toolData[i][3])));
+        } else {
+            std::cerr << "Error: Malformed tool data at row " << i << std::endl;
+        }
+    }
+
+    // Load RoomObjects
+    std::vector<std::vector<std::string>> roomObjectData = CSVParser::readCSV("sql/room_objects.csv");
+    std::cout << "Loading RoomObjects..." << std::endl;
+    for (size_t i = 1; i < roomObjectData.size(); ++i) { // Skip header row
+        if (roomObjectData[i].size() > 3) {
+            allRoomObjects.push_back(std::make_unique<RoomObject>(std::stoi(roomObjectData[i][0]), roomObjectData[i][1], roomObjectData[i][2], std::stoi(roomObjectData[i][3])));
+        } else {
+            std::cerr << "Error: Malformed room object data at row " << i << std::endl;
+        }
+    }
+
     // Load Exits (after all rooms are loaded)
     std::vector<std::vector<std::string>> exitData = CSVParser::readCSV("sql/exits.csv");
     std::cout << "Loading Exits..." << std::endl;
