@@ -1,7 +1,8 @@
 #include "Room.h"
-#include "objects/Character.h"
+#include "objects/RoomObject.h"
 #include "objects/Challenge.h" // Include Challenge.h
 #include <iostream>
+#include <algorithm> // For std::remove
 
 Room::Room(const std::string& description) : description(description) {}
 
@@ -22,12 +23,16 @@ std::string Room::getDescription() const {
     return description;
 }
 
-void Room::addCharacter(Character* character) {
-    characters.push_back(character);
+void Room::addObject(RoomObject* object) {
+    objects.push_back(object);
 }
 
-const std::vector<Character*>& Room::getCharacters() const {
-    return characters;
+void Room::removeObject(RoomObject* object) {
+    objects.erase(std::remove(objects.begin(), objects.end(), object), objects.end());
+}
+
+const std::vector<RoomObject*>& Room::getObjects() const {
+    return objects;
 }
 
 const std::map<std::string, Room*>& Room::getAllExits() const {

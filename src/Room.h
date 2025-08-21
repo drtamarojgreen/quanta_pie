@@ -6,12 +6,11 @@
 #include <vector>
 #include <memory> // For std::unique_ptr
 
-#include "objects/Character.h"
+#include "objects/RoomObject.h"
 #include "objects/Challenge.h"
 
 // Forward declarations
 class Player;
-class Character;
 class Challenge;
 
 /**
@@ -56,16 +55,22 @@ public:
     void printExits() const;
 
     /**
-     * @brief Adds a character to the room.
-     * @param character A pointer to the Character to add to the room.
+     * @brief Adds an object to the room.
+     * @param object A pointer to the RoomObject to add.
      */
-    void addCharacter(Character* character);
+    void addObject(RoomObject* object);
 
     /**
-     * @brief Gets the characters in the room.
-     * @return A constant reference to the vector of characters in the room.
+     * @brief Removes an object from the room.
+     * @param object A pointer to the RoomObject to remove.
      */
-    const std::vector<Character*>& getCharacters() const;
+    void removeObject(RoomObject* object);
+
+    /**
+     * @brief Gets all the objects in the room.
+     * @return A constant reference to the vector of objects in the room.
+     */
+    const std::vector<RoomObject*>& getObjects() const;
     const std::map<std::string, Room*>& getAllExits() const; // New function to get all exits
     void setChallenge(std::unique_ptr<Challenge> challenge); // Set a challenge for this room
     Challenge* getChallenge() const; // Get the challenge for this room
@@ -73,7 +78,7 @@ public:
 private:
     std::string description;
     std::map<std::string, Room*> exits;
-    std::vector<Character*> characters;
+    std::vector<RoomObject*> objects;
     std::unique_ptr<Challenge> room_challenge; // Optional challenge for the room
 };
 

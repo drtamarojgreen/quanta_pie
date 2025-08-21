@@ -47,3 +47,14 @@ int Player::getScore() const {
 void Player::incrementScore(int amount) {
     score += amount;
 }
+
+void Player::takeTool(Tool* tool) {
+    if (tool && currentRoom) {
+        tools.push_back(tool);
+        currentRoom->removeObject(tool);
+    }
+}
+
+const std::vector<Tool*>& Player::getTools() const {
+    return tools;
+}
