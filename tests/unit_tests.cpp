@@ -2,6 +2,8 @@
 #include "../src/Room.h"
 #include "../src/objects/Challenge.h"
 #include "../src/objects/Character.h"
+#include "../src/objects/Tool.h"
+#include "../src/objects/RoomObject.h"
 #include "../src/players/Player.h"
 #include "../src/Score.h"
 #include <vector>
@@ -86,6 +88,26 @@ bool testScore_Creation() {
     return true;
 }
 
+// Test case for Tool class
+bool testTool_Creation() {
+    Tool tool(1, "Key", "A small rusty key.", 101);
+    ASSERT_EQ(tool.getId(), 1);
+    ASSERT_EQ(tool.getName(), "Key");
+    ASSERT_EQ(tool.getDescription(), "A small rusty key.");
+    ASSERT_EQ(tool.getInitialRoomId(), 101);
+    return true;
+}
+
+// Test case for RoomObject class
+bool testRoomObject_Creation() {
+    RoomObject roomObject(1, "Chair", "A wooden chair.", 101);
+    ASSERT_EQ(roomObject.getId(), 1);
+    ASSERT_EQ(roomObject.getName(), "Chair");
+    ASSERT_EQ(roomObject.getDescription(), "A wooden chair.");
+    ASSERT_EQ(roomObject.getRoomId(), 101);
+    return true;
+}
+
 
 // Function to register all unit tests with the runner
 void registerUnitTests(TestRunner& runner) {
@@ -95,4 +117,6 @@ void registerUnitTests(TestRunner& runner) {
     runner.addTest("testPlayer_CreationAndScore", testPlayer_CreationAndScore);
     runner.addTest("testPlayer_RoomNavigation", testPlayer_RoomNavigation);
     runner.addTest("testScore_Creation", testScore_Creation);
+    runner.addTest("testTool_Creation", testTool_Creation);
+    runner.addTest("testRoomObject_Creation", testRoomObject_Creation);
 }
