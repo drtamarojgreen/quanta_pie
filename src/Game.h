@@ -12,6 +12,8 @@
 #include "Score.h"
 #include "objects/Character.h" // Include full definition of Character
 #include "objects/Challenge.h" // Include Challenge definition
+#include "objects/Tool.h"
+#include "objects/RoomObject.h"
 
 // Forward declaration for the Console class to avoid including platform-specific headers
 class Console;
@@ -66,6 +68,8 @@ private:
     std::vector<std::unique_ptr<GameSession>> allGameSessions;
     std::vector<std::unique_ptr<Score>> allScores;
     std::vector<std::unique_ptr<Character>> allCharacters;
+    std::vector<std::unique_ptr<Tool>> allTools;
+    std::vector<std::unique_ptr<RoomObject>> allRoomObjects;
     bool gameOver;
     std::unique_ptr<Challenge> current_challenge; // The currently active CBT challenge
 };
