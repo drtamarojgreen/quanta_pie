@@ -12,6 +12,7 @@
 // Forward declarations
 class Player;
 class Challenge;
+class Tool;
 
 /**
  * @class Room
@@ -71,6 +72,25 @@ public:
      * @return A constant reference to the vector of objects in the room.
      */
     const std::vector<RoomObject*>& getObjects() const;
+
+    /**
+     * @brief Adds a tool to the room.
+     * @param tool A pointer to the Tool to add.
+     */
+    void addTool(Tool* tool);
+
+    /**
+     * @brief Removes a tool from the room.
+     * @param tool A pointer to the Tool to remove.
+     */
+    void removeTool(Tool* tool);
+
+    /**
+     * @brief Gets all the tools in the room.
+     * @return A constant reference to the vector of tools in the room.
+     */
+    const std::vector<Tool*>& getTools() const;
+
     const std::map<std::string, Room*>& getAllExits() const; // New function to get all exits
     void setChallenge(std::unique_ptr<Challenge> challenge); // Set a challenge for this room
     Challenge* getChallenge() const; // Get the challenge for this room
@@ -79,6 +99,7 @@ private:
     std::string description;
     std::map<std::string, Room*> exits;
     std::vector<RoomObject*> objects;
+    std::vector<Tool*> tools;
     std::unique_ptr<Challenge> room_challenge; // Optional challenge for the room
 };
 

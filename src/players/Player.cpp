@@ -52,7 +52,7 @@ void Player::takeTool(Tool* tool) {
     if (tool) {
         tools.push_back(tool);
         if (currentRoom) {
-            currentRoom->removeObject(tool);
+            currentRoom->removeTool(tool);
         }
     }
 }
@@ -66,6 +66,6 @@ void Player::dropTool(Tool* tool) {
         // Remove the tool from the player's inventory
         tools.erase(std::remove(tools.begin(), tools.end(), tool), tools.end());
         // Add the tool to the current room
-        currentRoom->addObject(tool);
+        currentRoom->addTool(tool);
     }
 }

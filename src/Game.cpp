@@ -139,7 +139,19 @@ void Game::loadDataFromCSV() {
     std::cout << "Loading Tools..." << std::endl;
     for (size_t i = 1; i < toolData.size(); ++i) { // Skip header row
         if (toolData[i].size() > 3) {
-            allTools.push_back(std::make_unique<Tool>(std::stoi(toolData[i][0]), toolData[i][1], toolData[i][2], std::stoi(toolData[i][3])));
+            int toolId = std::stoi(toolData[i][0]);
+            std::string name = toolData[i][1];
+            std::string description = toolData[i][2];
+            int initialRoomId = std::stoi(toolData[i][3]);
+
+            auto newTool = std::make_unique<Tool>(toolId, name, description, initialRoomId);
+
+            if (initialRoomId > 0 && static_cast<size_t>(initialRoomId) <= allRooms.size()) {
+                allRooms[initialRoomId - 1]->addTool(newTool.get());
+            } else {
+                std::cerr << "Error: Invalid room ID " << initialRoomId << " for tool '" << name << "' at row " << i << std::endl;
+            }
+            allTools.push_back(std::move(newTool));
         } else {
             std::cerr << "Error: Malformed tool data at row " << i << std::endl;
         }
@@ -150,7 +162,19 @@ void Game::loadDataFromCSV() {
     std::cout << "Loading RoomObjects..." << std::endl;
     for (size_t i = 1; i < roomObjectData.size(); ++i) { // Skip header row
         if (roomObjectData[i].size() > 3) {
-            allRoomObjects.push_back(std::make_unique<RoomObject>(std::stoi(roomObjectData[i][0]), roomObjectData[i][1], roomObjectData[i][2], std::stoi(roomObjectData[i][3])));
+            int objectId = std::stoi(roomObjectData[i][0]);
+            std::string name = roomObjectData[i][1];
+            std::string description = roomObjectData[i][2];
+            int roomId = std::stoi(roomObjectData[i][3]);
+
+            auto newRoomObject = std::make_unique<RoomObject>(objectId, name, description, roomId);
+
+            if (roomId > 0 && static_cast<size_t>(roomId) <= allRooms.size()) {
+                allRooms[roomId - 1]->addObject(newRoomObject.get());
+            } else {
+                std::cerr << "Error: Invalid room ID " << roomId << " for room object '" << name << "' at row " << i << std::endl;
+            }
+            allRoomObjects.push_back(std::move(newRoomObject));
         } else {
             std::cerr << "Error: Malformed room object data at row " << i << std::endl;
         }
@@ -211,6 +235,24 @@ std::vector<std::string> Game::getRoomInfoLines() {
             }
         }
 
+        const auto& objects = currentRoom->getObjects();
+        if (!objects.empty()) {
+            lines.push_back(""); // Empty line for spacing
+            lines.push_back("You notice:");
+            for (const auto& object : objects) {
+                lines.push_back(" - " + object->getName());
+            }
+        }
+
+        const auto& tools = currentRoom->getTools();
+        if (!tools.empty()) {
+            lines.push_back(""); // Empty line for spacing
+            lines.push_back("On the floor, you see:");
+            for (const auto& tool : tools) {
+                lines.push_back(" - A " + tool->getName());
+            }
+        }
+
         lines.push_back(""); // Empty line for spacing
         lines.push_back("It's you!");
         lines.push_back(player->getRepresentation());
@@ -237,12 +279,23 @@ std::vector<std::string> Game::getSidePanelLines() {
     lines.push_back("----------------------------------------");
     lines.push_back("Score: " + std::to_string(player->getScore()));
     lines.push_back("----------------------------------------");
+    lines.push_back("             INVENTORY                ");
+    const auto& inventory = player->getTools();
+    if (inventory.empty()) {
+        lines.push_back("  (empty)");
+    } else {
+        for (const auto& tool : inventory) {
+            lines.push_back("  - " + tool->getName());
+        }
+    }
+    lines.push_back("----------------------------------------");
     lines.push_back("               HELP                     ");
-    lines.push_back("  - up/north, down/south, left/west, right/east to move.");
-    lines.push_back("  - 'look': Look around.");
-    lines.push_back("  - 'dance': Do a jig.");
-    lines.push_back("  - 'help': Show commands.");
-    lines.push_back("  - 'quit': Exit game.");
+    lines.push_back("  - move: n, s, e, w, up, down, etc.");
+    lines.push_back("  - look:               (see room)");
+    lines.push_back("  - look at <object>:   (describe)");
+    lines.push_back("  - take <tool>:        (pick up)");
+    lines.push_back("  - drop <tool>:        (drop)");
+    lines.push_back("  - quit:               (exit game)");
     lines.push_back("----------------------------------------");
     lines.push_back("               MAP                      ");
     lines.push_back("----------------------------------------");
@@ -251,18 +304,18 @@ std::vector<std::string> Game::getSidePanelLines() {
     std::map<std::string, Room*> exits = currentRoom->getAllExits();
 
     lines.push_back("       ");
-    if (exits.count("north")) lines.back() += "[ ]"; else lines.back() += "   ";
+    if (exits.count("north")) lines.back() += "[N]"; else lines.back() += "   ";
     lines.push_back("       |");
     lines.push_back("       |");
     std::string middle_map_line = "";
-    if (exits.count("west")) middle_map_line += "[ ]---"; else middle_map_line += "      ";
+    if (exits.count("west")) middle_map_line += "[W]---"; else middle_map_line += "      ";
     middle_map_line += "[X]"; // Current room
-    if (exits.count("east")) middle_map_line += "---[ ]";
+    if (exits.count("east")) middle_map_line += "---[E]";
     lines.push_back(middle_map_line);
     lines.push_back("       |");
     lines.push_back("       |");
     lines.push_back("       ");
-    if (exits.count("south")) lines.back() += "[ ]"; else lines.back() += "   ";
+    if (exits.count("south")) lines.back() += "[S]"; else lines.back() += "   ";
 
     lines.push_back("----------------------------------------");
     return lines;
@@ -295,12 +348,20 @@ void Game::displayGameScreen() {
     }
     // Set cursor position for input prompt
     console->setCursorPosition(0, max_height + 1);
+
+    // Display and clear the message buffer
+    if (!message_buffer.empty()) {
+        std::cout << message_buffer << std::endl;
+        message_buffer.clear();
+        // Place cursor for input below the message
+        console->setCursorPosition(0, max_height + 2);
+    }
 }
 
 void Game::printWelcomeMessage() {
     std::cout << "Welcome to Quanta_Pie!" << std::endl;
     std::cout << "----------------------------------------" << std::endl;
-    displayGameScreen(); // Use the new display function
+    // displayGameScreen(); // Use the new display function
     // printHelp(); // Help is now part of the side panel
 }
 
@@ -310,128 +371,124 @@ void Game::gameLoop() {
             gameOver = true;
             continue;
         }
-        displayGameScreen(); // Display combined screen at the beginning of each loop
+        displayGameScreen();
         std::cout << "> ";
 
-        int ch = console->getChar(); // Read a single character
-
-        // Handle extended keys (like arrow keys)
-        if (ch == 0 || ch == 0xE0) {
-            ch = console->getChar(); // Read the second byte for extended key
-            switch (ch) {
-                case 72: // Up arrow
-                    processInput("north");
-                    break;
-                case 80: // Down arrow
-                    processInput("south");
-                    break;
-                case 75: // Left arrow
-                    processInput("west");
-                    break;
-                case 77: // Right arrow
-                    processInput("east");
-                    break;
-                default:
-                    // Ignore other extended keys
-                    break;
-            }
-        } else {
-            // Handle regular characters
-            std::string input_str(1, static_cast<char>(ch)); // Convert char to string
-            if (input_str == "q") { // 'q' for quit
-                gameOver = true;
-                continue;
-            }
-            // If a challenge is active, process input as a choice number
-            else if (current_challenge) {
-                int choice_num = -1;
-                try {
-                    choice_num = std::stoi(input_str);
-                } catch (const std::invalid_argument& e) {
-                    // Not a number, ignore or provide feedback
-                } catch (const std::out_of_range& e) {
-                    // Number too large/small, ignore or provide feedback
-                }
-
-                if (choice_num > 0 && choice_num <= current_challenge->getChoices().size()) {
-                    current_challenge->getChoices()[choice_num - 1].action(); // Execute the chosen action
-                } else {
-                    // Invalid choice for challenge, ignore or provide feedback
-                }
-            }
-            else if (input_str == "h") { // 'h' for help
-                processInput("help");
-            } else if (input_str == "l") { // 'l' for look
-                processInput("look");
-            } else if (input_str == "d") { // 'd' for dance
-                processInput("dance");
-            } else {
-                // For other single character inputs, pass them to processInput
-                // This allows for future single-character commands
-                processInput(input_str);
-            }
-        }
+#if defined(_WIN32) || defined(_WIN64)
+        // This part is for Windows and supports arrow keys, but not multi-word commands.
+        // The core logic is now in processInput, which expects full command lines.
+        // For simplicity in this refactor, we will use getline for all platforms.
+        // A more robust solution would handle char-by-char input and build a command string.
+        std::string input_line;
+        std::getline(std::cin, input_line);
+        processInput(input_line);
 #else
         std::string input_line;
         std::getline(std::cin, input_line);
-        if (input_line == "quit") {
-            gameOver = true;
-        } else {
-            processInput(input_line);
-        }
+        processInput(input_line);
 #endif
     }
     std::cout << "Thank you for playing Quanta_Pie!" << std::endl;
 }
 
+// Helper function to convert a string to lowercase
+std::string toLower(const std::string& str) {
+    std::string lower_str = str;
+    std::transform(lower_str.begin(), lower_str.end(), lower_str.begin(), ::tolower);
+    return lower_str;
+}
+
 void Game::processInput(const std::string& input) {
     if (!player) return;
 
-    std::string lowerInput = input;
-    // Convert input to lowercase for case-insensitive comparison
-    std::transform(lowerInput.begin(), lowerInput.end(), lowerInput.begin(), ::tolower);
+    std::string lowerInput = toLower(input);
+    Room* currentRoom = player->getCurrentRoom();
 
-    // If a challenge is active, process input as a choice number
-    if (current_challenge) {
-        // This part is now handled in gameLoop directly for single-key input
-        // This function will only be called by gameLoop for mapped commands (north, south, etc.)
+    if (lowerInput == "quit") {
+        gameOver = true;
         return;
     }
 
-    // Process normal game commands
-    if (lowerInput == "help") {
-        // Help is now part of the side panel, no separate print needed here
-        // Or, if a specific help message is desired, it should be handled differently
-    } else if (lowerInput == "look") {
-        // Look just updates the display, which happens automatically in gameLoop
-    } else if (lowerInput == "dance") {
-        // This is a temporary message, will be replaced by combat/action messages
-        std::cout << "You do a little jig. It's surprisingly uplifting." << std::endl;
-    } else if (lowerInput == "up") {
-        processInput("north"); // Map 'up' to 'north'
-    } else if (lowerInput == "down") {
-        processInput("south"); // Map 'down' to 'south'
-    } else if (lowerInput == "left") {
-        processInput("west"); // Map 'left' to 'west'
-    } else if (lowerInput == "right") {
-        processInput("east"); // Map 'right' to 'east'
+    // If a challenge is active, handle numbered choices
+    if (current_challenge) {
+        int choice_num = -1;
+        try {
+            choice_num = std::stoi(lowerInput);
+            if (choice_num > 0 && static_cast<size_t>(choice_num) <= current_challenge->getChoices().size()) {
+                current_challenge->getChoices()[choice_num - 1].action();
+            } else {
+                message_buffer = "Invalid choice.";
+            }
+        } catch (const std::invalid_argument&) {
+            message_buffer = "Please enter a number to make a choice.";
+        } catch (const std::out_of_range&) {
+            message_buffer = "That number is out of range.";
+        }
+        return;
     }
-    else {
-        // Try to move
-        Room* current = player->getCurrentRoom();
-        Room* nextRoom = current->getExit(lowerInput);
 
+    // Command Parsing
+    if (lowerInput == "help") {
+        message_buffer = "Help is displayed on the right panel.";
+    } else if (lowerInput == "look") {
+        // The screen redraws automatically, so this command just serves to refresh.
+        // We can add a specific message if desired.
+        message_buffer = "You look around.";
+    } else if (lowerInput.rfind("look at ", 0) == 0) {
+        std::string targetName = input.substr(8);
+        bool found = false;
+        for (const auto& object : currentRoom->getObjects()) {
+            if (toLower(object->getName()) == toLower(targetName)) {
+                message_buffer = object->getDescription();
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            message_buffer = "You don't see any '" + targetName + "' here.";
+        }
+    } else if (lowerInput.rfind("take ", 0) == 0) {
+        std::string targetName = input.substr(5);
+        Tool* toolToTake = nullptr;
+        for (auto& tool : currentRoom->getTools()) {
+            if (toLower(tool->getName()) == toLower(targetName)) {
+                toolToTake = tool;
+                break;
+            }
+        }
+        if (toolToTake) {
+            player->takeTool(toolToTake);
+            // player->takeTool already removes it from the room, so we don't need to do it here.
+            message_buffer = "You take the " + targetName + ".";
+        } else {
+            message_buffer = "You can't find any '" + targetName + "' to take.";
+        }
+    } else if (lowerInput.rfind("drop ", 0) == 0) {
+        std::string targetName = input.substr(5);
+        Tool* toolToDrop = nullptr;
+        for (auto& tool : player->getTools()) {
+            if (toLower(tool->getName()) == toLower(targetName)) {
+                toolToDrop = tool;
+                break;
+            }
+        }
+        if (toolToDrop) {
+            player->dropTool(toolToDrop);
+            message_buffer = "You drop the " + targetName + ".";
+        } else {
+            message_buffer = "You don't have a '" + targetName + "' to drop.";
+        }
+    } else {
+        // Assume movement
+        Room* nextRoom = currentRoom->getExit(lowerInput);
         if (nextRoom != nullptr) {
             player->setCurrentRoom(nextRoom);
-            player->incrementScore(); // Increment score on successful move
-            // Check for challenge in the new room
+            player->incrementScore();
             if (nextRoom->getChallenge() != nullptr) {
-                current_challenge = std::make_unique<Challenge>(nextRoom->getChallenge()->getThought(), nextRoom->getChallenge()->getChoices());
+                current_challenge = std::make_unique<Challenge>(*nextRoom->getChallenge());
             }
         } else {
-            // This message will be overwritten by the next displayGameScreen() call
-            // Consider a temporary message area or a more robust message system
-            std::cout << "You can't go that way. Type 'help' for a list of commands." << std::endl;
+            message_buffer = "You can't do that. (Type 'help' for commands)";
         }
     }
 }

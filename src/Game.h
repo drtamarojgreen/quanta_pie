@@ -72,6 +72,7 @@ private:
     std::vector<std::unique_ptr<RoomObject>> allRoomObjects;
     bool gameOver;
     std::unique_ptr<Challenge> current_challenge; // The currently active CBT challenge
+    std::string message_buffer; // To display one-off messages to the player
 };
 
 #endif // GAME_H

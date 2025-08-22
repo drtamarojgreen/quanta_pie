@@ -1,5 +1,6 @@
 #include "Room.h"
 #include "objects/RoomObject.h"
+#include "objects/Tool.h"
 #include "objects/Challenge.h" // Include Challenge.h
 #include <iostream>
 #include <algorithm> // For std::remove
@@ -37,6 +38,18 @@ const std::vector<RoomObject*>& Room::getObjects() const {
 
 const std::map<std::string, Room*>& Room::getAllExits() const {
     return exits;
+}
+
+void Room::addTool(Tool* tool) {
+    tools.push_back(tool);
+}
+
+void Room::removeTool(Tool* tool) {
+    tools.erase(std::remove(tools.begin(), tools.end(), tool), tools.end());
+}
+
+const std::vector<Tool*>& Room::getTools() const {
+    return tools;
 }
 
 void Room::setChallenge(std::unique_ptr<Challenge> challenge) {
