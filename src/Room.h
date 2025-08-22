@@ -12,6 +12,7 @@
 // Forward declarations
 class Player;
 class Challenge;
+class Character;
 
 /**
  * @class Room
@@ -75,10 +76,14 @@ public:
     void setChallenge(std::unique_ptr<Challenge> challenge); // Set a challenge for this room
     Challenge* getChallenge() const; // Get the challenge for this room
 
+    void addCharacter(Character* character);
+    const std::vector<Character*>& getCharacters() const;
+
 private:
     std::string description;
     std::map<std::string, Room*> exits;
     std::vector<RoomObject*> objects;
+    std::vector<Character*> characters;
     std::unique_ptr<Challenge> room_challenge; // Optional challenge for the room
 };
 

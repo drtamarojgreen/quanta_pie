@@ -91,7 +91,7 @@ void Game::loadDataFromCSV() {
             int initialRoomId = std::stoi(characterData[i][3]);
             std::string dialogue = characterData[i][4];
             std::cout << "Character Name: " << name << ", Description: " << description << ", Dialogue: " << dialogue << std::endl;
-            auto newCharacter = std::make_unique<Character>(name, description, dialogue);
+            auto newCharacter = std::make_unique<Character>(std::stoi(characterData[i][0]), name, description, initialRoomId, dialogue);
             if (initialRoomId > 0 && initialRoomId <= allRooms.size()) {
                 allRooms[initialRoomId - 1]->addCharacter(newCharacter.get()); // Pass raw pointer to Room
             }

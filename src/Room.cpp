@@ -1,6 +1,7 @@
 #include "Room.h"
 #include "objects/RoomObject.h"
 #include "objects/Challenge.h" // Include Challenge.h
+#include "objects/Character.h"
 #include <iostream>
 #include <algorithm> // For std::remove
 
@@ -45,6 +46,14 @@ void Room::setChallenge(std::unique_ptr<Challenge> challenge) {
 
 Challenge* Room::getChallenge() const {
     return room_challenge.get();
+}
+
+void Room::addCharacter(Character* character) {
+    characters.push_back(character);
+}
+
+const std::vector<Character*>& Room::getCharacters() const {
+    return characters;
 }
 
 void Room::printExits() const {

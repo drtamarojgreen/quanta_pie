@@ -1,89 +1,31 @@
-# 🥧 Quanta_Pie
+# QuantaVerse: Integration Specialist
 
-*A Text-Based C++ Adventure Game in the Quanta Series*
+QuantaVerse is a text-based adventure game that incorporates Cognitive Behavioral Therapy (CBT) principles into its gameplay. The player takes on the role of an "Integration Specialist" navigating challenges and interactions within a futuristic world.
 
----
+## Prerequisites
 
-## 🌌 Overview
+To build and run this project, you will need a C++ compiler that supports C++11 or later (for features like `std::function` and lambdas). The `g++` compiler, part of the MinGW-w64 toolchain on Windows or available on Linux/macOS, is a standard choice.
 
-**Quanta_Pie** is the latest installment in the **Quanta Series**, a collection of experimental, lightweight projects that mix science, play, and creativity. This time, we’re diving into the deliciously mysterious world of text-based adventure.
+## Building the Application
 
-In **Quanta_Pie**, you’ll navigate through a surreal landscape where logic, strategy, and curiosity matter more than graphics. Every choice alters the story, every action shifts the outcome, and the pie… well, the pie might just hold the key to everything.
+1.  **Open a terminal** or command prompt (like PowerShell, Command Prompt, or Git Bash) and navigate to the root directory of this project (`quanta_pie`).
 
-Built entirely in **modern C++17**, Quanta_Pie is designed to be:
+2.  **Compile the source files** by running the following command. This command gathers all the necessary `.cpp` files, tells the compiler where to find the header files (with `-Isrc`), and links them into a single executable.
 
--   **🚀 Lightweight:** No unnecessary dependencies.
--   **⚡ Fast:** Text is instant, interaction is smooth.
--   **🧩 Expandable:** Modular code structure makes adding new story branches easy.
-
----
-
-## ✨ Features
-
--   **Classic Text Adventure Gameplay:** Explore, choose, and survive in a branching narrative.
--   **Dynamic Story Paths:** Multiple endings based on your decisions.
--   **C++ Core:** Demonstrates clean, modern C++ techniques in a fun, narrative-driven project.
--   **Quanta Series Continuity:** Threads of scientific and philosophical themes tie back into the broader Quanta universe.
-
----
-
-## 📈 Current Status
-
--   **In Development:** The game is currently in the active development phase.
--   **Tissdb Integration:** We are working on integrating Tissdb for persistent data storage and enhanced narrative branching.
-
----
-
-## 🚀 Getting Started
-
-### Build Instructions
-
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/your-username/Quanta_Pie.git
-    cd Quanta_Pie
+    ```sh
+    g++ src/main.cpp src/Game.cpp src/objects/*.cpp -o quanta_pie.exe -Isrc -std=c++17
     ```
+    *Note 1: We use `src/objects/*.cpp` to automatically include all game object source files (like `Challenge.cpp`, `Player.cpp`, etc.) from the `src/objects` directory.*
+    *Note 2: We use `-std=c++17` to enable modern C++ features like `std::make_unique` and structured bindings.*
 
-2.  **Compile the project:**
-    To compile the game, you will need a C++ compiler that supports C++17. The following command uses `g++`:
+3.  After the command completes successfully, you should see a new file named `quanta_pie.exe` in the project's root directory.
 
-    ```bash
-    g++ -std=c++17 -o Quanta_Pie src/*.cpp
-    ```
-    *Note: In accordance with project directives, this command has not been tested but is expected to work based on the project structure.*
+## Running the Game
 
-3.  **Run the game:**
-    ```bash
-    ./Quanta_Pie
-    ```
+Once the application is built, you can run it from the same terminal:
 
----
+```sh
+./quanta_pie.exe
+```
 
-## 🧪 Running Tests
-
-A suite of unit and BDD-style tests is included in the `tests/` directory. To build and run the tests, you will need a C++ compiler that supports C++17.
-
-1.  **Compile the test suite:**
-    The following command uses `g++` to compile all test files and the necessary source files from the `src/` directory.
-
-    ```bash
-    g++ -std=c++17 -I./src -o test_runner tests/*.cpp src/*.cpp src/objects/*.cpp src/players/*.cpp
-    ```
-    *Note: In accordance with project directives, this command has not been tested but is expected to work based on the project structure.*
-
-2.  **Run the tests:**
-    ```bash
-    ./test_runner
-    ```
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! If you have ideas for new story branches, features, or improvements, feel free to open an issue or submit a pull request.
-
----
-
-## 📜 License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+The game will start, and you can interact with it through the console. To exit the game at any time, press `Ctrl+C`.
