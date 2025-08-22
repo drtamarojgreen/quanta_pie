@@ -63,16 +63,23 @@ void Game::createWorld(const std::string& sql_file_path) {
             // Example: Add a challenge to the starting room
             if (allRooms[0]->getChallenge() == nullptr) {
                 std::vector<CBTChoice> choices;
-                choices.push_back({"Challenge the thought", [this](Game& game){
-                    game.player->incrementScore(10);
-                    game.current_challenge = nullptr; // Resolve challenge
+                CBTChoice choice1;
+                choice1.description = "Challenge the thought";
+                choice1.action = [this]() { // Lambda captures 'this' (Game instance)
+                    this->player->incrementScore(10);
+                    this->current_challenge = nullptr; // Resolve challenge
                     // Add more complex outcomes here
-                }});
-                choices.push_back({"Accept the thought", [this](Game& game){
-                    game.player->incrementScore(-5);
-                    game.current_challenge = nullptr; // Resolve challenge
+                };
+                choices.push_back(choice1);
+
+                CBTChoice choice2;
+                choice2.description = "Accept the thought";
+                choice2.action = [this]() { // Lambda captures 'this' (Game instance)
+                    this->player->incrementScore(-5);
+                    this->current_challenge = nullptr; // Resolve challenge
                     // Add more complex outcomes here
-                }});
+                };
+                choices.push_back(choice2);
                 allRooms[0]->setChallenge(std::make_unique<Challenge>("You feel overwhelmed by the vastness of the void.", choices));
             }
         }

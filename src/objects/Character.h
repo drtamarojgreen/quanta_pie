@@ -2,7 +2,7 @@
 #define CHARACTER_H
 
 #include <string>
-#include "../Room.h" // Include Room.h from its new location
+// #include "../Room.h" // Removed to break circular dependency
 
 class Character {
 public:
