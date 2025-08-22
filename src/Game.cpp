@@ -101,6 +101,39 @@ void Game::loadDataFromCSV() {
         }
     }
 
+    // Load Challenges
+    std::vector<std::vector<std::string>> challengeData = CSVParser::readCSV("sql/challenges.csv");
+    std::cout << "Loading Challenges..." << std::endl;
+    for (size_t i = 1; i < challengeData.size(); ++i) { // Skip header row
+        if (challengeData[i].size() > 2) {
+            int room_id = std::stoi(challengeData[i][0]);
+            std::string thought = challengeData[i][1];
+            // For simplicity, choices are not loaded from CSV in this example
+            std::vector<CBTChoice> choices;
+            CBTChoice choice1;
+            choice1.description = "Challenge the thought";
+            choice1.action = [this]() { 
+                this->player->incrementScore(10);
+                this->current_challenge = nullptr; 
+            };
+            choices.push_back(choice1);
+
+            CBTChoice choice2;
+            choice2.description = "Accept the thought";
+            choice2.action = [this]() { 
+                this->player->incrementScore(-5);
+                this->current_challenge = nullptr; 
+            };
+            choices.push_back(choice2);
+
+            if (room_id > 0 && room_id <= allRooms.size()) {
+                allRooms[room_id - 1]->setChallenge(std::make_unique<Challenge>(thought, choices));
+            }
+        } else {
+            std::cerr << "Error: Malformed challenge data at row " << i << std::endl;
+        }
+    }
+
     // Load Players
     std::vector<std::vector<std::string>> playerData = CSVParser::readCSV("sql/players.csv");
     std::cout << "Loading Players..." << std::endl;
@@ -239,10 +272,15 @@ std::vector<std::string> Game::getSidePanelLines() {
     lines.push_back("Score: " + std::to_string(player->getScore()));
     lines.push_back("----------------------------------------");
     lines.push_back("            COMMANDS                    ");
-    lines.push_back("  - To move, type a direction:");
-    lines.push_back("    'north', 'south', 'east', 'west'");
+        lines.push_back("  - Use arrow keys to move");
     lines.push_back("  - Other commands:");
-    lines.push_back("    'look', 'dance', 'quit'");
+    lines.push_back("    'l' - look");
+    lines.push_back("    'd' - dance");
+    lines.push_back("    'q' - quit");
+    lines.push_back("  - Other commands:");
+    lines.push_back("    'l' - look");
+    lines.push_back("    'd' - dance");
+    lines.push_back("    'q' - quit");
     lines.push_back("----------------------------------------");
     lines.push_back("               MAP                      ");
     lines.push_back("----------------------------------------");
@@ -325,24 +363,38 @@ void Game::gameLoop() {
         displayGameScreen(); // Refresh screen at the start of every turn
 
         std::cout << "> ";
-        std::string input_line;
-        if (!std::getline(std::cin, input_line)) {
-            // Handle EOF (Ctrl+D on Unix, Ctrl+Z on Windows)
-            if (std::cin.eof()) {
-                gameOver = true;
-                std::cout << std::endl << "Exiting game due to end-of-file." << std::endl;
-                continue;
+        int ch = console->getChar();
+
+        // Arrow keys on Windows are composed of two characters.
+        // The first is 224 (or 0xE0).
+        if (ch == 224) {
+            ch = console->getChar(); // Get the actual key code
+            switch (ch) {
+                case 72: // Up arrow
+                    processInput("north");
+                    break;
+                case 80: // Down arrow
+                    processInput("south");
+                    break;
+                case 75: // Left arrow
+                    processInput("west");
+                    break;
+                case 77: // Right arrow
+                    processInput("east");
+                    break;
             }
-        }
-
-        // Convert input to lowercase for case-insensitive comparison
-        std::transform(input_line.begin(), input_line.end(), input_line.begin(),
-                       [](unsigned char c){ return std::tolower(c); });
-
-        if (input_line == "quit") {
-            gameOver = true;
         } else {
-            processInput(input_line);
+            // Handle regular character input
+            std::string input_line(1, ch);
+            // Convert input to lowercase for case-insensitive comparison
+            std::transform(input_line.begin(), input_line.end(), input_line.begin(),
+                           [](unsigned char c){ return std::tolower(c); });
+
+            if (input_line == "q") {
+                gameOver = true;
+            } else {
+                processInput(input_line);
+            }
         }
     }
     std::cout << "Thank you for playing Quanta_Pie!" << std::endl;
@@ -379,11 +431,11 @@ void Game::processInput(const std::string& input) {
     }
 
     // Process normal game commands
-    if (lowerInput == "help") {
+    if (lowerInput == "h" || lowerInput == "help") {
         // The help panel is always visible. This command is a no-op.
-    } else if (lowerInput == "look") {
+    } else if (lowerInput == "l" || lowerInput == "look") {
         // 'look' simply forces a screen refresh, which happens on every loop.
-    } else if (lowerInput == "dance") {
+    } else if (lowerInput == "d" || lowerInput == "dance") {
         // This is a temporary message, will be replaced by combat/action messages
         std::cout << "You do a little jig. It's surprisingly uplifting." << std::endl;
     } else {
