@@ -109,9 +109,72 @@ bool testRoomObject_Creation() {
 }
 
 
+// Test case for adding and getting a RoomObject
+bool testRoom_AddAndGetObject() {
+    Room room("Test Room");
+    RoomObject object(1, "Test Object", "An object for testing", 1);
+
+    room.addObject(&object);
+
+    ASSERT_EQ(room.getObjects().size(), 1);
+    ASSERT_EQ(room.getObjects()[0]->getName(), "Test Object");
+
+    return true;
+}
+
+// Test case for adding and removing a RoomObject
+bool testRoom_AddAndRemoveObject() {
+    Room room("Test Room");
+    RoomObject object(1, "Test Object", "An object for testing", 1);
+
+    room.addObject(&object);
+    ASSERT_EQ(room.getObjects().size(), 1);
+
+    room.removeObject(&object);
+    ASSERT_EQ(room.getObjects().size(), 0);
+
+    return true;
+}
+
+// Test case for setting and getting a Challenge
+bool testRoom_SetAndGetChallenge() {
+    Room room("Test Room");
+    std::vector<CBTChoice> choices = {{"Choice 1", [](){}}};
+    auto challenge = std::make_unique<Challenge>("Test Challenge", choices);
+    Challenge* challenge_ptr = challenge.get(); // Get raw pointer before move
+
+    room.setChallenge(std::move(challenge));
+
+    ASSERT_EQ(room.getChallenge(), challenge_ptr);
+    ASSERT_EQ(room.getChallenge()->getThought(), "Test Challenge");
+
+    return true;
+}
+
+// Test case for getting all exits
+bool testRoom_GetAllExits() {
+    Room room("Test Room");
+    Room north_room("North Room");
+    Room south_room("South Room");
+
+    room.addExit("north", &north_room);
+    room.addExit("south", &south_room);
+
+    const auto& exits = room.getAllExits();
+    ASSERT_EQ(exits.size(), 2);
+    ASSERT_EQ(exits.at("north"), &north_room);
+    ASSERT_EQ(exits.at("south"), &south_room);
+
+    return true;
+}
+
 // Function to register all unit tests with the runner
 void registerUnitTests(TestRunner& runner) {
     runner.addTest("testRoom_AddAndGetExit", testRoom_AddAndGetExit);
+    runner.addTest("testRoom_AddAndGetObject", testRoom_AddAndGetObject);
+    runner.addTest("testRoom_AddAndRemoveObject", testRoom_AddAndRemoveObject);
+    runner.addTest("testRoom_SetAndGetChallenge", testRoom_SetAndGetChallenge);
+    runner.addTest("testRoom_GetAllExits", testRoom_GetAllExits);
     runner.addTest("testChallenge_Creation", testChallenge_Creation);
     runner.addTest("testCharacter_Creation", testCharacter_Creation);
     runner.addTest("testPlayer_CreationAndScore", testPlayer_CreationAndScore);
