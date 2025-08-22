@@ -49,12 +49,23 @@ void Player::incrementScore(int amount) {
 }
 
 void Player::takeTool(Tool* tool) {
-    if (tool && currentRoom) {
+    if (tool) {
         tools.push_back(tool);
-        currentRoom->removeObject(tool);
+        if (currentRoom) {
+            currentRoom->removeObject(tool);
+        }
     }
 }
 
 const std::vector<Tool*>& Player::getTools() const {
     return tools;
+}
+
+void Player::dropTool(Tool* tool) {
+    if (tool && currentRoom) {
+        // Remove the tool from the player's inventory
+        tools.erase(std::remove(tools.begin(), tools.end(), tool), tools.end());
+        // Add the tool to the current room
+        currentRoom->addObject(tool);
+    }
 }
