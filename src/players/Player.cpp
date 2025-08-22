@@ -7,6 +7,15 @@ Player::Player(int id, const std::string& name, const std::string& joinDate, Roo
 Player::Player(Room* startingRoom)
     : id(0), name("Player"), joinDate("N/A"), currentRoom(startingRoom), score(0) {}
 
+void Player::move(const std::string& direction) {
+    if (currentRoom) {
+        Room* nextRoom = currentRoom->getExit(direction);
+        if (nextRoom) {
+            setCurrentRoom(nextRoom);
+        }
+    }
+}
+
 void Player::setCurrentRoom(Room* room) {
     currentRoom = room;
 }
@@ -37,4 +46,15 @@ int Player::getScore() const {
 
 void Player::incrementScore(int amount) {
     score += amount;
+}
+
+void Player::takeTool(Tool* tool) {
+    if (tool && currentRoom) {
+        tools.push_back(tool);
+        currentRoom->removeObject(tool);
+    }
+}
+
+const std::vector<Tool*>& Player::getTools() const {
+    return tools;
 }

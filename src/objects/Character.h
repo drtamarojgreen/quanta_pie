@@ -1,20 +1,20 @@
 #ifndef CHARACTER_H
 #define CHARACTER_H
 
+#include "RoomObject.h"
 #include <string>
 // #include "../Room.h" // Removed to break circular dependency
 
-class Character {
-public:
-    Character(const std::string& name, const std::string& description, const std::string& dialogue);
+// Forward declaration of Room to avoid circular dependency
+class Room;
 
-    std::string getName() const;
-    std::string getDescription() const;
+class Character : public RoomObject {
+public:
+    Character(int id, const std::string& name, const std::string& description, int room_id, const std::string& dialogue);
+
     std::string getDialogue() const;
 
 private:
-    std::string name;
-    std::string description;
     std::string dialogue;
 };
 
