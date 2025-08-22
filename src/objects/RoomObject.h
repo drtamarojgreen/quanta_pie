@@ -6,6 +6,7 @@
 class RoomObject {
 public:
     RoomObject(int id, const std::string& name, const std::string& description, int room_id);
+    virtual ~RoomObject() = default;
 
     int getId() const;
     std::string getName() const;

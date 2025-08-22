@@ -47,7 +47,7 @@ bool testChallenge_Creation() {
 
 // Test case for Character class
 bool testCharacter_Creation() {
-    Character character("Gandalf", "A powerful wizard", "You shall not pass!");
+    Character character(1, "Gandalf", "A powerful wizard", 1, "You shall not pass!");
     ASSERT_EQ(character.getName(), "Gandalf");
     ASSERT_EQ(character.getDescription(), "A powerful wizard");
     ASSERT_EQ(character.getDialogue(), "You shall not pass!");

@@ -24,6 +24,7 @@ public:
 
     // Inventory methods
     void takeTool(Tool* tool);
+    void dropTool(Tool* tool);
     const std::vector<Tool*>& getTools() const;
 
 private:

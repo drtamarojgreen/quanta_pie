@@ -94,10 +94,34 @@ bool testPlayerInventory() {
 }
 
 
+// BDD-style test for player dropping a tool
+bool testPlayerDropsTool() {
+    // GIVEN a player in a room with a tool in their inventory
+    Room room("A test room");
+    Player player(0, "Test Player", "2024-01-01", &room);
+    Tool tool(1, "Hammer", "A sturdy hammer.", 1);
+    player.takeTool(&tool); // Player starts with the tool
+
+    // WHEN the player drops the tool
+    player.dropTool(&tool);
+
+    // THEN the player's inventory should be empty
+    ASSERT_EQ(player.getTools().size(), 0);
+
+    // AND the tool should be in the room
+    const auto& objects = room.getObjects();
+    ASSERT_EQ(objects.size(), 1);
+    ASSERT_EQ(objects[0]->getName(), "Hammer");
+
+    return true;
+}
+
+
 // Function to register all BDD tests with the runner
 void registerBddTests(TestRunner& runner) {
     runner.addTest("testPlayerMovement", testPlayerMovement);
     runner.addTest("testEncounterCharacter", testEncounterCharacter);
     runner.addTest("testPlayerPicksUpTool", testPlayerPicksUpTool);
     runner.addTest("testPlayerInventory", testPlayerInventory);
+    runner.addTest("testPlayerDropsTool", testPlayerDropsTool);
 }
