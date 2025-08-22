@@ -183,9 +183,10 @@ std::vector<std::string> Game::getRoomInfoLines() {
         lines.push_back("----------------------------------------");
         lines.push_back("               CHALLENGE!               ");
         lines.push_back("----------------------------------------");
+        lines.push_back("A sudden thought crosses your mind, demanding a response.");
         lines.push_back("Thought: " + current_challenge->getThought());
         lines.push_back("");
-        lines.push_back("Choices:");
+        lines.push_back("How do you respond? (Enter the number of your choice)");
         for (size_t i = 0; i < current_challenge->getChoices().size(); ++i) {
             lines.push_back(std::to_string(i + 1) + ". " + current_challenge->getChoices()[i].description);
         }
@@ -230,12 +231,11 @@ std::vector<std::string> Game::getSidePanelLines() {
     lines.push_back("----------------------------------------");
     lines.push_back("Score: " + std::to_string(player->getScore()));
     lines.push_back("----------------------------------------");
-    lines.push_back("               HELP                     ");
-    lines.push_back("  - up/north, down/south, left/west, right/east to move.");
-    lines.push_back("  - 'look': Look around.");
-    lines.push_back("  - 'dance': Do a jig.");
-    lines.push_back("  - 'help': Show commands.");
-    lines.push_back("  - 'quit': Exit game.");
+    lines.push_back("            COMMANDS                    ");
+    lines.push_back("  - To move, type a direction:");
+    lines.push_back("    'north', 'south', 'east', 'west'");
+    lines.push_back("  - Other commands:");
+    lines.push_back("    'look', 'dance', 'quit'");
     lines.push_back("----------------------------------------");
     lines.push_back("               MAP                      ");
     lines.push_back("----------------------------------------");
@@ -244,18 +244,18 @@ std::vector<std::string> Game::getSidePanelLines() {
     std::map<std::string, Room*> exits = currentRoom->getAllExits();
 
     lines.push_back("       ");
-    if (exits.count("north")) lines.back() += "[ ]"; else lines.back() += "   ";
+    if (exits.count("north")) lines.back() += "[N]"; else lines.back() += "   ";
     lines.push_back("       |");
     lines.push_back("       |");
     std::string middle_map_line = "";
-    if (exits.count("west")) middle_map_line += "[ ]---"; else middle_map_line += "      ";
+    if (exits.count("west")) middle_map_line += "[W]---"; else middle_map_line += "      ";
     middle_map_line += "[X]"; // Current room
-    if (exits.count("east")) middle_map_line += "---[ ]";
+    if (exits.count("east")) middle_map_line += "---[E]";
     lines.push_back(middle_map_line);
     lines.push_back("       |");
     lines.push_back("       |");
     lines.push_back("       ");
-    if (exits.count("south")) lines.back() += "[ ]"; else lines.back() += "   ";
+    if (exits.count("south")) lines.back() += "[S]"; else lines.back() += "   ";
 
     lines.push_back("----------------------------------------");
     return lines;
@@ -291,10 +291,21 @@ void Game::displayGameScreen() {
 }
 
 void Game::printWelcomeMessage() {
+    console->clear(); // Clear screen before showing the message
     std::cout << "Welcome to Quanta_Pie!" << std::endl;
-    std::cout << "----------------------------------------" << std::endl;
-    displayGameScreen(); // Use the new display function
-    // printHelp(); // Help is now part of the side panel
+    std::cout << std::endl;
+    std::cout << "This is a game of exploration and introspection." << std::endl;
+    std::cout << "You find yourself in a strange, shifting world. Your goal is to navigate" << std::endl;
+    std::cout << "the rooms, interact with characters, and face the challenges you encounter." << std::endl;
+    std::cout << std::endl;
+    std::cout << "Type commands and press Enter to interact with the world." << std::endl;
+    std::cout << "Basic commands are listed in the HELP panel on the right." << std::endl;
+    std::cout << std::endl;
+    std::cout << "Press Enter to begin..." << std::endl;
+    std::string dummy;
+    std::getline(std::cin, dummy); // Wait for user to press Enter
+
+    displayGameScreen(); // Initial display
 }
 
 void Game::gameLoop() {
@@ -303,76 +314,29 @@ void Game::gameLoop() {
             gameOver = true;
             continue;
         }
-        displayGameScreen(); // Display combined screen at the beginning of each loop
+
+        displayGameScreen(); // Refresh screen at the start of every turn
+
         std::cout << "> ";
-
-        int ch = console->getChar(); // Read a single character
-
-        // Handle extended keys (like arrow keys)
-        if (ch == 0 || ch == 0xE0) {
-            ch = console->getChar(); // Read the second byte for extended key
-            switch (ch) {
-                case 72: // Up arrow
-                    processInput("north");
-                    break;
-                case 80: // Down arrow
-                    processInput("south");
-                    break;
-                case 75: // Left arrow
-                    processInput("west");
-                    break;
-                case 77: // Right arrow
-                    processInput("east");
-                    break;
-                default:
-                    // Ignore other extended keys
-                    break;
-            }
-        } else {
-            // Handle regular characters
-            std::string input_str(1, static_cast<char>(ch)); // Convert char to string
-            if (input_str == "q") { // 'q' for quit
+        std::string input_line;
+        if (!std::getline(std::cin, input_line)) {
+            // Handle EOF (Ctrl+D on Unix, Ctrl+Z on Windows)
+            if (std::cin.eof()) {
                 gameOver = true;
+                std::cout << std::endl << "Exiting game due to end-of-file." << std::endl;
                 continue;
             }
-            // If a challenge is active, process input as a choice number
-            else if (current_challenge) {
-                int choice_num = -1;
-                try {
-                    choice_num = std::stoi(input_str);
-                } catch (const std::invalid_argument& e) {
-                    // Not a number, ignore or provide feedback
-                } catch (const std::out_of_range& e) {
-                    // Number too large/small, ignore or provide feedback
-                }
-
-                if (choice_num > 0 && choice_num <= current_challenge->getChoices().size()) {
-                    current_challenge->getChoices()[choice_num - 1].action(); // Execute the chosen action
-                } else {
-                    // Invalid choice for challenge, ignore or provide feedback
-                }
-            }
-            else if (input_str == "h") { // 'h' for help
-                processInput("help");
-            } else if (input_str == "l") { // 'l' for look
-                processInput("look");
-            } else if (input_str == "d") { // 'd' for dance
-                processInput("dance");
-            } else {
-                // For other single character inputs, pass them to processInput
-                // This allows for future single-character commands
-                processInput(input_str);
-            }
         }
-#else
-        std::string input_line;
-        std::getline(std::cin, input_line);
+
+        // Convert input to lowercase for case-insensitive comparison
+        std::transform(input_line.begin(), input_line.end(), input_line.begin(),
+                       [](unsigned char c){ return std::tolower(c); });
+
         if (input_line == "quit") {
             gameOver = true;
         } else {
             processInput(input_line);
         }
-#endif
     }
     std::cout << "Thank you for playing Quanta_Pie!" << std::endl;
 }
@@ -380,37 +344,43 @@ void Game::gameLoop() {
 void Game::processInput(const std::string& input) {
     if (!player) return;
 
-    std::string lowerInput = input;
-    // Convert input to lowercase for case-insensitive comparison
-    std::transform(lowerInput.begin(), lowerInput.end(), lowerInput.begin(), ::tolower);
+    // Input is already lowercased in gameLoop
+    const std::string& lowerInput = input;
 
     // If a challenge is active, process input as a choice number
     if (current_challenge) {
-        // This part is now handled in gameLoop directly for single-key input
-        // This function will only be called by gameLoop for mapped commands (north, south, etc.)
-        return;
+        int choice_num = -1;
+        try {
+            // Attempt to convert the entire input string to a number
+            choice_num = std::stoi(lowerInput);
+        } catch (const std::invalid_argument& e) {
+            // Not a number, maybe it's a different command?
+            // For now, we'll just say it's an invalid choice.
+            // A more complex implementation could allow other commands during a challenge.
+        } catch (const std::out_of_range& e) {
+            // Number too large/small
+        }
+
+        if (choice_num > 0 && static_cast<size_t>(choice_num) <= current_challenge->getChoices().size()) {
+            // Execute the chosen action. The lambda will set current_challenge to nullptr.
+            current_challenge->getChoices()[choice_num - 1].action();
+        } else {
+            // Invalid choice. We can add a message to the player here.
+            // For now, doing nothing is fine, the screen will just refresh.
+        }
+        return; // Stop further processing after handling challenge input
     }
 
     // Process normal game commands
     if (lowerInput == "help") {
-        // Help is now part of the side panel, no separate print needed here
-        // Or, if a specific help message is desired, it should be handled differently
+        // The help panel is always visible. This command is a no-op.
     } else if (lowerInput == "look") {
-        // Look just updates the display, which happens automatically in gameLoop
+        // 'look' simply forces a screen refresh, which happens on every loop.
     } else if (lowerInput == "dance") {
         // This is a temporary message, will be replaced by combat/action messages
         std::cout << "You do a little jig. It's surprisingly uplifting." << std::endl;
-    } else if (lowerInput == "up") {
-        processInput("north"); // Map 'up' to 'north'
-    } else if (lowerInput == "down") {
-        processInput("south"); // Map 'down' to 'south'
-    } else if (lowerInput == "left") {
-        processInput("west"); // Map 'left' to 'west'
-    } else if (lowerInput == "right") {
-        processInput("east"); // Map 'right' to 'east'
-    }
-    else {
-        // Try to move
+    } else {
+        // Any other command is assumed to be a move attempt.
         Room* current = player->getCurrentRoom();
         Room* nextRoom = current->getExit(lowerInput);
 
@@ -419,12 +389,11 @@ void Game::processInput(const std::string& input) {
             player->incrementScore(); // Increment score on successful move
             // Check for challenge in the new room
             if (nextRoom->getChallenge() != nullptr) {
-                current_challenge = std::make_unique<Challenge>(nextRoom->getChallenge()->getThought(), nextRoom->getChallenge()->getChoices());
+                current_challenge = std::make_unique<Challenge>(*nextRoom->getChallenge());
             }
         } else {
-            // This message will be overwritten by the next displayGameScreen() call
-            // Consider a temporary message area or a more robust message system
-            std::cout << "You can't go that way. Type 'help' for a list of commands." << std::endl;
+            // We can add a message to a message buffer to be displayed on the next screen refresh
+            // For now, we'll just let the screen refresh, which shows the command was ineffective.
         }
     }
 }
