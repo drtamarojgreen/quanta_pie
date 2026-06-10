@@ -33,3 +33,9 @@ void WindowsConsole::clear() {
 int WindowsConsole::getChar() {
     return _getch();
 }
+
+int WindowsConsole::getConsoleWidth() const {
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(hConsole, &csbi);
+    return csbi.srWindow.Right - csbi.srWindow.Left + 1;
+}

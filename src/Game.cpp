@@ -316,8 +316,9 @@ void Game::displayGameScreen() {
     // Determine max height
     size_t max_height = std::max(room_lines.size(), side_panel_lines.size());
 
-    const int GAME_AREA_WIDTH = 60; // Adjust as needed
-    const int SIDE_PANEL_START_X = GAME_AREA_WIDTH + 2; // 2 spaces between game area and side panel
+    const int console_width = console->getConsoleWidth();
+    const int GAME_AREA_WIDTH = static_cast<int>(console_width * 0.6);
+    const int SIDE_PANEL_START_X = GAME_AREA_WIDTH + 2;
 
     for (size_t i = 0; i < max_height; ++i) {
         std::string room_line = (i < room_lines.size()) ? room_lines[i] : "";

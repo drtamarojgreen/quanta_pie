@@ -34,6 +34,12 @@ public:
      * @return The ASCII value of the character read.
      */
     virtual int getChar() = 0;
+
+    /**
+     * @brief Gets the width of the console window.
+     * @return The width of the console window in characters.
+     */
+    virtual int getConsoleWidth() const = 0;
 };
 
 #endif // CONSOLE_H

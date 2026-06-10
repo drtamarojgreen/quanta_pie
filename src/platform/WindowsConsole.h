@@ -44,6 +44,12 @@ public:
      */
     int getChar() override;
 
+    /**
+     * @brief Gets the width of the console window.
+     * @return The width of the console window in characters.
+     */
+    int getConsoleWidth() const override;
+
 private:
     HANDLE hConsole; // Handle to the console screen buffer
 };
