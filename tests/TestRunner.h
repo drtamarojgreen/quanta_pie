@@ -29,8 +29,8 @@ public:
     // Register a test case with a given name
     void addTest(const std::string& name, TestCase test);
 
-    // Run all registered test cases
-    void runTests();
+    // Run all registered test cases; returns the number of failures
+    int runTests();
 
 private:
     struct Test {

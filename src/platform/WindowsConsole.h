@@ -50,8 +50,14 @@ public:
      */
     int getConsoleWidth() const override;
 
+    /**
+     * @brief Sets the text colour with the Windows console attributes.
+     */
+    void setColor(ConsoleColor color) override;
+
 private:
     HANDLE hConsole; // Handle to the console screen buffer
+    WORD defaultAttributes; // The console's colours when the game started
 };
 
 #endif // WINDOWS_CONSOLE_H

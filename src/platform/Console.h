@@ -2,6 +2,21 @@
 #define CONSOLE_H
 
 /**
+ * @enum ConsoleColor
+ * @brief Foreground colours every console can show.
+ */
+enum class ConsoleColor {
+    Default,
+    Red,
+    Green,
+    Yellow,
+    Blue,
+    Magenta,
+    Cyan,
+    White
+};
+
+/**
  * @class Console
  * @brief An abstract base class for platform-specific console operations.
  *
@@ -40,6 +55,12 @@ public:
      * @return The width of the console window in characters.
      */
     virtual int getConsoleWidth() const = 0;
+
+    /**
+     * @brief Sets the colour of text written after this call. Consoles without colour ignore it.
+     * @param color The foreground colour; Default restores the console's normal colour.
+     */
+    virtual void setColor(ConsoleColor color) { (void)color; }
 };
 
 #endif // CONSOLE_H

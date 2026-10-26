@@ -1,19 +1,16 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include <vector>
-#include <string>
 #include <fstream>
-#include <memory> // For std::unique_ptr
+#include <iostream>
+#include <memory>
+#include <string>
+#include <vector>
 #include <csignal> // For sig_atomic_t
-#include "players/Player.h"
-#include "Room.h"
-#include "GameSession.h"
-#include "Score.h"
-#include "objects/Character.h" // Include full definition of Character
-#include "objects/Challenge.h" // Include Challenge definition
-#include "objects/Tool.h"
-#include "objects/RoomObject.h"
+#include "environments/GameConfig.h"
+#include "environments/Gauntlet.h"
+#include "environments/Hud.h"
+#include "environments/Profiler.h"
 
 // Forward declaration for the Console class to avoid including platform-specific headers
 class Console;
@@ -22,23 +19,32 @@ extern volatile sig_atomic_t g_signal_received; // Declare global signal flag
 
 /**
  * @class Game
- * @brief Manages the main game loop, world creation, and player interaction.
+ * @brief The console frontend: a welcome menu, then draws the gauntlet and feeds it key presses.
  *
- * This class is the central hub of the Quanta_Pie game. It initializes the
- * game world, contains the main game loop, processes player input, and
- * tracks the overall game state.
+ * Settings come from config.txt (see GameConfig); the rooms, layouts and spawn points are
+ * loaded from the CSV tables in the data directory. The same Game runs on Windows
+ * (WindowsConsole) and Linux (PosixConsole); only the console differs. Frames are redrawn
+ * line by line, only where they changed.
  */
 class Game {
 public:
     /**
-     * @brief Constructs a new Game object.
+     * @brief Constructs a new Game object from config.txt, if there is one.
+     * @throws ConfigError or WorldDataError if the settings or the world data are invalid.
      */
     Game();
 
     /**
-     * @brief Constructs a new Game object with a custom SQL file.
+     * @brief Constructs a new Game object, loading the world from a data directory.
+     * @throws ConfigError or WorldDataError if the settings or the world data are invalid.
      */
-    Game(const std::string& sql_file_path);
+    Game(const std::string& data_directory);
+
+    /**
+     * @brief Constructs a Game with given settings, console and output stream.
+     * @throws WorldDataError if the world data is missing or invalid.
+     */
+    Game(const GameConfig& config, std::unique_ptr<Console> console, std::ostream& output = std::cout);
 
     /**
      * @brief Destroys the Game object, cleaning up allocated resources.
@@ -46,32 +52,29 @@ public:
     ~Game(); // Defined in .cpp to handle unique_ptr to incomplete type
 
     /**
-     * @brief Starts the game, displaying the welcome message and beginning the main loop.
+     * @brief Starts the game: the welcome menu, then the main loop.
      */
     void start();
 
-private:
-    void createWorld(const std::string& sql_file_path);
-    void gameLoop();
-    void processInput(const std::string& input);
-    void printWelcomeMessage();
-    void printHelp();
-    void loadDataFromCSV();
-    std::vector<std::string> getRoomInfoLines(); // Modified to return lines
-    std::vector<std::string> getSidePanelLines(); // Modified to return lines
-    void displayGameScreen(); // New function to display combined screen
+    const Gauntlet& getGauntlet() const;
+    const Profiler& getProfiler() const;
 
+private:
+    bool runWelcomeMenu(); // Returns false if input ends before the game begins
+    void gameLoop();
+    void displayGameScreen();
+    void writeStyled(const Hud::StyledLine& line);
+    void processKey(int key);
+    void logEvent(const GameEvent& event);
+
+    GameConfig config;
     std::unique_ptr<Console> console; // Platform-agnostic console interface
-    std::unique_ptr<Player> player; // The main player character
-    std::vector<std::unique_ptr<Room>> allRooms;
-    std::vector<std::unique_ptr<Player>> allPlayers;
-    std::vector<std::unique_ptr<GameSession>> allGameSessions;
-    std::vector<std::unique_ptr<Score>> allScores;
-    std::vector<std::unique_ptr<Character>> allCharacters;
-    std::vector<std::unique_ptr<Tool>> allTools;
-    std::vector<std::unique_ptr<RoomObject>> allRoomObjects;
-    bool gameOver;
-    std::unique_ptr<Challenge> current_challenge; // The currently active CBT challenge
+    std::ostream& output;
+    Profiler profiler;
+    Gauntlet gauntlet;
+    std::ofstream log;
+    std::vector<Hud::StyledLine> frame; // What is on screen now
+    bool shake_next_frame;
 };
 
 #endif // GAME_H

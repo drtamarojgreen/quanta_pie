@@ -2,7 +2,14 @@
 #include <conio.h>   // Required for _getch()
 #include <windows.h> // Required for Windows console API
 
-WindowsConsole::WindowsConsole() : hConsole(GetStdHandle(STD_OUTPUT_HANDLE)) {}
+WindowsConsole::WindowsConsole() : hConsole(GetStdHandle(STD_OUTPUT_HANDLE)), defaultAttributes(0) {
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    if (GetConsoleScreenBufferInfo(hConsole, &csbi)) {
+        defaultAttributes = csbi.wAttributes;
+    } else {
+        defaultAttributes = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
+    }
+}
 
 void WindowsConsole::setCursorPosition(int x, int y) {
     COORD coord;
@@ -38,4 +45,21 @@ int WindowsConsole::getConsoleWidth() const {
     CONSOLE_SCREEN_BUFFER_INFO csbi;
     GetConsoleScreenBufferInfo(hConsole, &csbi);
     return csbi.srWindow.Right - csbi.srWindow.Left + 1;
+}
+
+void WindowsConsole::setColor(ConsoleColor color) {
+    // Keep the background bits; replace only the foreground colour.
+    WORD background = defaultAttributes & 0xF0;
+    WORD foreground = defaultAttributes & 0x0F;
+    switch (color) {
+        case ConsoleColor::Default: break;
+        case ConsoleColor::Red:     foreground = FOREGROUND_RED | FOREGROUND_INTENSITY; break;
+        case ConsoleColor::Green:   foreground = FOREGROUND_GREEN | FOREGROUND_INTENSITY; break;
+        case ConsoleColor::Yellow:  foreground = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY; break;
+        case ConsoleColor::Blue:    foreground = FOREGROUND_BLUE | FOREGROUND_INTENSITY; break;
+        case ConsoleColor::Magenta: foreground = FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY; break;
+        case ConsoleColor::Cyan:    foreground = FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY; break;
+        case ConsoleColor::White:   foreground = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY; break;
+    }
+    SetConsoleTextAttribute(hConsole, background | foreground);
 }

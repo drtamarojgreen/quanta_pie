@@ -1,10 +1,11 @@
 #include "TestRunner.h"
+#include <exception>
 
 void TestRunner::addTest(const std::string& name, TestCase test) {
     tests.push_back({name, test});
 }
 
-void TestRunner::runTests() {
+int TestRunner::runTests() {
     int passed = 0;
     int failed = 0;
 
@@ -13,7 +14,12 @@ void TestRunner::runTests() {
 
     for (const auto& t : tests) {
         std::cout << "Running test: " << t.name << "..." << std::endl;
-        bool result = t.test();
+        bool result = false;
+        try {
+            result = t.test();
+        } catch (const std::exception& error) {
+            std::cerr << "Uncaught exception: " << error.what() << std::endl;
+        }
         if (result) {
             std::cout << "[  PASSED  ] " << t.name << std::endl;
             passed++;
@@ -26,4 +32,5 @@ void TestRunner::runTests() {
 
     std::cout << "Test run finished." << std::endl;
     std::cout << "Passed: " << passed << ", Failed: " << failed << std::endl;
+    return failed;
 }

@@ -1,0 +1,11 @@
+obstacle_type,symbol,name,description
+1,?,Self-Doubt,A fog of 'I can't do this' hangs across the doorway.
+2,!,Impulsive Anger,A wall of heat flares whenever you approach the exit.
+3,~,Misunderstanding,"A figure blocks the way, certain you meant them harm."
+4,z,Apathy,A heavy grey curtain whispers that nothing is worth the effort.
+5,&,Interpersonal Conflict,"Two voices argue loudly in front of the door, refusing to yield."
+6,<,Setback,The path ahead has collapsed; you must begin a section again.
+7,%,Sudden Change,The corridor rearranges itself the moment you understand it.
+8,=,Repeated Failure,A gate that has rejected you before stands shut once more.
+9,o,Isolation,Silence presses in; the exit seems impossible to reach alone.
+10,*,Burnout,Every step costs everything; the final door asks why you keep going.

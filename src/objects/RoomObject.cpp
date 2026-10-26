@@ -19,3 +19,11 @@ std::string RoomObject::getDescription() const {
 int RoomObject::getRoomId() const {
     return room_id;
 }
+
+Position RoomObject::getPosition() const {
+    return position;
+}
+
+void RoomObject::setPosition(const Position& position) {
+    this->position = position;
+}

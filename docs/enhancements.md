@@ -121,3 +121,7 @@ A list of 100 possible enhancements for the game, focusing on action-based gamep
 98. Add a speedrun timer.
 99. Implement a "lore" or "bestiary" section in the menu that fills out as you discover things.
 100. Add different starting classes or backgrounds with unique stats or equipment.
+
+## Follow-up ideas
+
+101. **Support irregular room outlines and balanced spawn placement.** The current layout data stores only width and height, and every tile inside that rectangle is walkable. Add a per-layout walkability mask (or wall tiles) and update movement, pathing, validation, and rendering so rooms can have alcoves and cut corners. Equipment spawn coordinates are already data-driven in `sql/gauntlet_spawn_points.csv`, but changing them also changes the routes and health cost of the full 100-room run; design alternate positions and rebalance the route together.

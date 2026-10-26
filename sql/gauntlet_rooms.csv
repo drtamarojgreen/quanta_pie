@@ -1,0 +1,101 @@
+room_id,name,description,layout_id
+1,Hall of Echoes I,"Voices from old conversations bounce between bare stone walls, each one repeating a doubt you once had.",1
+2,Hall of Echoes II,"Voices from old conversations bounce between bare stone walls, each one repeating a doubt you once had.",1
+3,Hall of Echoes III,"Voices from old conversations bounce between bare stone walls, each one repeating a doubt you once had.",1
+4,Hall of Echoes IV,"Voices from old conversations bounce between bare stone walls, each one repeating a doubt you once had.",1
+5,Hall of Echoes V,"Voices from old conversations bounce between bare stone walls, each one repeating a doubt you once had.",1
+6,Hall of Echoes VI,"Voices from old conversations bounce between bare stone walls, each one repeating a doubt you once had.",1
+7,Hall of Echoes VII,"Voices from old conversations bounce between bare stone walls, each one repeating a doubt you once had.",1
+8,Hall of Echoes VIII,"Voices from old conversations bounce between bare stone walls, each one repeating a doubt you once had.",1
+9,Hall of Echoes IX,"Voices from old conversations bounce between bare stone walls, each one repeating a doubt you once had.",1
+10,Hall of Echoes X,"Voices from old conversations bounce between bare stone walls, each one repeating a doubt you once had.",1
+11,Ember Corridor I,Heat rises from cracks in the floor and the air smells of struck matches. Tempers flare easily here.,1
+12,Ember Corridor II,Heat rises from cracks in the floor and the air smells of struck matches. Tempers flare easily here.,1
+13,Ember Corridor III,Heat rises from cracks in the floor and the air smells of struck matches. Tempers flare easily here.,1
+14,Ember Corridor IV,Heat rises from cracks in the floor and the air smells of struck matches. Tempers flare easily here.,1
+15,Ember Corridor V,Heat rises from cracks in the floor and the air smells of struck matches. Tempers flare easily here.,1
+16,Ember Corridor VI,Heat rises from cracks in the floor and the air smells of struck matches. Tempers flare easily here.,1
+17,Ember Corridor VII,Heat rises from cracks in the floor and the air smells of struck matches. Tempers flare easily here.,1
+18,Ember Corridor VIII,Heat rises from cracks in the floor and the air smells of struck matches. Tempers flare easily here.,1
+19,Ember Corridor IX,Heat rises from cracks in the floor and the air smells of struck matches. Tempers flare easily here.,1
+20,Ember Corridor X,Heat rises from cracks in the floor and the air smells of struck matches. Tempers flare easily here.,1
+21,Gallery of Masks I,"Masks line the walls, each showing an expression you cannot quite read.",1
+22,Gallery of Masks II,"Masks line the walls, each showing an expression you cannot quite read.",1
+23,Gallery of Masks III,"Masks line the walls, each showing an expression you cannot quite read.",1
+24,Gallery of Masks IV,"Masks line the walls, each showing an expression you cannot quite read.",1
+25,Gallery of Masks V,"Masks line the walls, each showing an expression you cannot quite read.",1
+26,Gallery of Masks VI,"Masks line the walls, each showing an expression you cannot quite read.",1
+27,Gallery of Masks VII,"Masks line the walls, each showing an expression you cannot quite read.",1
+28,Gallery of Masks VIII,"Masks line the walls, each showing an expression you cannot quite read.",1
+29,Gallery of Masks IX,"Masks line the walls, each showing an expression you cannot quite read.",1
+30,Gallery of Masks X,"Masks line the walls, each showing an expression you cannot quite read.",1
+31,Grey Wastes I,"Colour drains from everything here. The floor is ash and the sky is a flat, endless grey.",1
+32,Grey Wastes II,"Colour drains from everything here. The floor is ash and the sky is a flat, endless grey.",1
+33,Grey Wastes III,"Colour drains from everything here. The floor is ash and the sky is a flat, endless grey.",1
+34,Grey Wastes IV,"Colour drains from everything here. The floor is ash and the sky is a flat, endless grey.",1
+35,Grey Wastes V,"Colour drains from everything here. The floor is ash and the sky is a flat, endless grey.",1
+36,Grey Wastes VI,"Colour drains from everything here. The floor is ash and the sky is a flat, endless grey.",1
+37,Grey Wastes VII,"Colour drains from everything here. The floor is ash and the sky is a flat, endless grey.",1
+38,Grey Wastes VIII,"Colour drains from everything here. The floor is ash and the sky is a flat, endless grey.",1
+39,Grey Wastes IX,"Colour drains from everything here. The floor is ash and the sky is a flat, endless grey.",1
+40,Grey Wastes X,"Colour drains from everything here. The floor is ash and the sky is a flat, endless grey.",1
+41,Council Chamber I,"A ring of empty chairs faces the centre, as if a hard conversation is about to begin.",1
+42,Council Chamber II,"A ring of empty chairs faces the centre, as if a hard conversation is about to begin.",1
+43,Council Chamber III,"A ring of empty chairs faces the centre, as if a hard conversation is about to begin.",1
+44,Council Chamber IV,"A ring of empty chairs faces the centre, as if a hard conversation is about to begin.",1
+45,Council Chamber V,"A ring of empty chairs faces the centre, as if a hard conversation is about to begin.",1
+46,Council Chamber VI,"A ring of empty chairs faces the centre, as if a hard conversation is about to begin.",1
+47,Council Chamber VII,"A ring of empty chairs faces the centre, as if a hard conversation is about to begin.",1
+48,Council Chamber VIII,"A ring of empty chairs faces the centre, as if a hard conversation is about to begin.",1
+49,Council Chamber IX,"A ring of empty chairs faces the centre, as if a hard conversation is about to begin.",1
+50,Council Chamber X,"A ring of empty chairs faces the centre, as if a hard conversation is about to begin.",1
+51,Broken Stair I,Steps that once led upward lie scattered in pieces. The way forward has to be rebuilt.,1
+52,Broken Stair II,Steps that once led upward lie scattered in pieces. The way forward has to be rebuilt.,1
+53,Broken Stair III,Steps that once led upward lie scattered in pieces. The way forward has to be rebuilt.,1
+54,Broken Stair IV,Steps that once led upward lie scattered in pieces. The way forward has to be rebuilt.,1
+55,Broken Stair V,Steps that once led upward lie scattered in pieces. The way forward has to be rebuilt.,1
+56,Broken Stair VI,Steps that once led upward lie scattered in pieces. The way forward has to be rebuilt.,1
+57,Broken Stair VII,Steps that once led upward lie scattered in pieces. The way forward has to be rebuilt.,1
+58,Broken Stair VIII,Steps that once led upward lie scattered in pieces. The way forward has to be rebuilt.,1
+59,Broken Stair IX,Steps that once led upward lie scattered in pieces. The way forward has to be rebuilt.,1
+60,Broken Stair X,Steps that once led upward lie scattered in pieces. The way forward has to be rebuilt.,1
+61,Shifting Maze I,Walls slide quietly into new positions whenever you look away.,1
+62,Shifting Maze II,Walls slide quietly into new positions whenever you look away.,1
+63,Shifting Maze III,Walls slide quietly into new positions whenever you look away.,1
+64,Shifting Maze IV,Walls slide quietly into new positions whenever you look away.,1
+65,Shifting Maze V,Walls slide quietly into new positions whenever you look away.,1
+66,Shifting Maze VI,Walls slide quietly into new positions whenever you look away.,1
+67,Shifting Maze VII,Walls slide quietly into new positions whenever you look away.,1
+68,Shifting Maze VIII,Walls slide quietly into new positions whenever you look away.,1
+69,Shifting Maze IX,Walls slide quietly into new positions whenever you look away.,1
+70,Shifting Maze X,Walls slide quietly into new positions whenever you look away.,1
+71,Gate of Trials I,"Scorch marks and dents cover every surface, the record of every attempt that came before yours.",1
+72,Gate of Trials II,"Scorch marks and dents cover every surface, the record of every attempt that came before yours.",1
+73,Gate of Trials III,"Scorch marks and dents cover every surface, the record of every attempt that came before yours.",1
+74,Gate of Trials IV,"Scorch marks and dents cover every surface, the record of every attempt that came before yours.",1
+75,Gate of Trials V,"Scorch marks and dents cover every surface, the record of every attempt that came before yours.",1
+76,Gate of Trials VI,"Scorch marks and dents cover every surface, the record of every attempt that came before yours.",1
+77,Gate of Trials VII,"Scorch marks and dents cover every surface, the record of every attempt that came before yours.",1
+78,Gate of Trials VIII,"Scorch marks and dents cover every surface, the record of every attempt that came before yours.",1
+79,Gate of Trials IX,"Scorch marks and dents cover every surface, the record of every attempt that came before yours.",1
+80,Gate of Trials X,"Scorch marks and dents cover every surface, the record of every attempt that came before yours.",1
+81,Silent Archive I,Endless shelves of unsent letters stand in a silence so complete it presses on your ears.,1
+82,Silent Archive II,Endless shelves of unsent letters stand in a silence so complete it presses on your ears.,1
+83,Silent Archive III,Endless shelves of unsent letters stand in a silence so complete it presses on your ears.,1
+84,Silent Archive IV,Endless shelves of unsent letters stand in a silence so complete it presses on your ears.,1
+85,Silent Archive V,Endless shelves of unsent letters stand in a silence so complete it presses on your ears.,1
+86,Silent Archive VI,Endless shelves of unsent letters stand in a silence so complete it presses on your ears.,1
+87,Silent Archive VII,Endless shelves of unsent letters stand in a silence so complete it presses on your ears.,1
+88,Silent Archive VIII,Endless shelves of unsent letters stand in a silence so complete it presses on your ears.,1
+89,Silent Archive IX,Endless shelves of unsent letters stand in a silence so complete it presses on your ears.,1
+90,Silent Archive X,Endless shelves of unsent letters stand in a silence so complete it presses on your ears.,1
+91,Summit of Embers I,"The last rooms burn low and orange, a steep climb where every step asks why you keep going.",1
+92,Summit of Embers II,"The last rooms burn low and orange, a steep climb where every step asks why you keep going.",1
+93,Summit of Embers III,"The last rooms burn low and orange, a steep climb where every step asks why you keep going.",1
+94,Summit of Embers IV,"The last rooms burn low and orange, a steep climb where every step asks why you keep going.",1
+95,Summit of Embers V,"The last rooms burn low and orange, a steep climb where every step asks why you keep going.",1
+96,Summit of Embers VI,"The last rooms burn low and orange, a steep climb where every step asks why you keep going.",1
+97,Summit of Embers VII,"The last rooms burn low and orange, a steep climb where every step asks why you keep going.",1
+98,Summit of Embers VIII,"The last rooms burn low and orange, a steep climb where every step asks why you keep going.",1
+99,Summit of Embers IX,"The last rooms burn low and orange, a steep climb where every step asks why you keep going.",1
+100,Summit of Embers X,"The last rooms burn low and orange, a steep climb where every step asks why you keep going.",1

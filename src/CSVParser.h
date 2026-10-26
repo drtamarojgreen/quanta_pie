@@ -8,8 +8,9 @@
 
 namespace CSVParser {
 
-    // Function to split a string by a delimiter, handling quoted fields
-    std::vector<std::string> split(const std::string& s, char delimiter) {
+    // Function to split a string by a delimiter, handling quoted fields.
+    // Inside quotes, a doubled quote ("") stands for one literal quote.
+    inline std::vector<std::string> split(const std::string& s, char delimiter) {
         std::vector<std::string> tokens;
         std::string currentToken;
         bool inQuote = false;
@@ -18,11 +19,11 @@ namespace CSVParser {
             char c = s[i];
 
             if (c == '"') {
-                inQuote = !inQuote;
-                // Handle escaped quotes: if next char is also a quote, it's an escaped quote
                 if (inQuote && i + 1 < s.length() && s[i+1] == '"') {
                     currentToken += '"';
-                    i++; // Skip the next quote
+                    i++; // Skip the second quote of the escaped pair
+                } else {
+                    inQuote = !inQuote;
                 }
             } else if (c == delimiter && !inQuote) {
                 tokens.push_back(currentToken);
@@ -36,7 +37,7 @@ namespace CSVParser {
     }
 
     // Function to read a CSV file and return its content as a vector of string vectors
-    std::vector<std::vector<std::string>> readCSV(const std::string& filename) {
+    inline std::vector<std::vector<std::string>> readCSV(const std::string& filename) {
         std::vector<std::vector<std::string>> data;
         std::ifstream file(filename);
 
@@ -46,6 +47,9 @@ namespace CSVParser {
 
         std::string line;
         while (std::getline(file, line)) {
+            if (!line.empty() && line.back() == '\r') {
+                line.pop_back(); // Files saved on Windows end lines with \r\n
+            }
             data.push_back(split(line, ','));
         }
 

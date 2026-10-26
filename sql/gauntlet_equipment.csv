@@ -1,0 +1,11 @@
+equipment_id,kind,slot,name,description
+1,EI,1,Mirror of Self-Awareness,Lets you name what you are feeling as you feel it.
+2,EI,2,Anchor of Self-Regulation,Steadies you long enough to choose a response instead of reacting.
+3,EI,3,Lens of Empathy,Shows a situation as someone else is experiencing it.
+4,EI,4,Compass of Motivation,"Points toward what matters to you, even when nothing feels urgent."
+5,EI,5,Bridge of Social Skill,Helps two sides cross toward each other.
+6,R,1,Lantern of Optimism,"Shows that a setback is temporary and specific, not permanent and total."
+7,R,2,Cloak of Adaptability,Lets you adjust to a changing situation without losing yourself.
+8,R,3,Boots of Perseverance,Carries you through one more attempt after many failed ones.
+9,R,4,Rope of Connection,Ties you to people who can help when you cannot go on alone.
+10,R,5,Ember of Purpose,Reminds you why you started when you are running out of energy.
